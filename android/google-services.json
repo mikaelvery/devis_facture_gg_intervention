@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "806155824999",
+    "project_id": "devis-facturation-gg-inter",
+    "storage_bucket": "devis-facturation-gg-inter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806155824999:android:cab9cb817fd3dc6ca109c2",
+        "android_client_info": {
+          "package_name": "com.example.devis_facture_gg_intervention"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY84Qmr7qXRmUQ8RvhVrw5EdqcBDRX9R0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

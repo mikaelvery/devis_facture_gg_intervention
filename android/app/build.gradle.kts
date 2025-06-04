@@ -3,12 +3,13 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.devis_facture_gg_intervention"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -42,3 +43,15 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Firebase Firestore (base de données NoSQL)
+    implementation("com.google.firebase:firebase-firestore")
+}
+

@@ -1,16 +1,43 @@
-# devis_facture_gg_intervention
+# 📱 GG Intervention
 
-A new Flutter project.
+Application mobile pour artisans, dédiée à la gestion rapide et simplifiée de devis, factures et rapports d’intervention.  
+Développée avec Flutter pour Android & iOS.
 
-## Getting Started
+## 🎯 Objectif
 
-This project is a starting point for a Flutter application.
+Faciliter le quotidien de l'artisan (plombiers, serrurier, ) avec une app tout-en-un.
 
-A few resources to get you started if this is your first Flutter project:
+## ✅ Fonctionnalités principales
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- ✍️ Créer un **devis**
+- 🧾 Éditer une **facture**
+- ✅ Marquer une facture comme **acquittée**
+- 💧 Rédiger un **rapport de recherche de fuite**
+- 🔧 Rédiger un **rapport d’intervention**
+- 📄 Générer des **PDFs** pour chaque document
+- ✉️ Envoyer par email avec `mailto:` 
+- 📚 Historique des documents (devis, factures, rapports)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🧱 Technologies utilisées
+
+- **Flutter** + **Dart**
+- `pdf` & `printing` (PDF)
+- `url_launcher` (email)
+- `sqflite` ou `hive` (stockage local)
+- `signature` (signature client)
+- `image_picker` (ajout photo)
+
+## 🎨 Palette de couleurs
+
+| Élément            | Couleur       |
+|--------------------|---------------|
+| Couleur principale | `#005A9C`     |
+| Couleur secondaire | `#F2A900`     |
+| Fond clair         | `#F5F5F5`     |
+
+## 📸 Capture d'écran
+
+_(à ajouter plus tard avec un screen de l'app)_
+
+## 📂 Structure recommandée
+
