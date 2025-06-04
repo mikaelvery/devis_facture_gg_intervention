@@ -11,10 +11,9 @@ class DevisService {
     required double baseHt,
     required double tva,
     required double totalTtc,
+    required bool isSigned,
   }) async {
-    // la date a 2 heure de retard je suis en france
     final Timestamp timestamp = Timestamp.fromDate(date);
-
     final devisData = {
       'date': timestamp,
       'client': client.toMap(),
@@ -23,6 +22,7 @@ class DevisService {
       'baseHt': baseHt,
       'tva': tva,
       'totalTtc': totalTtc,
+      'isSigned': isSigned,
     };
 
     await FirebaseFirestore.instance.collection('devis').add(devisData);

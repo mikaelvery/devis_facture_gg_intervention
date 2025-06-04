@@ -1,16 +1,21 @@
-import 'dart:io';
-import 'package:devis_facture_gg_intervention/constants/colors.dart'; // Ta couleur personnalisée bleuNuit
+import 'dart:io'; 
+import 'package:devis_facture_gg_intervention/constants/colors.dart';
+import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart'; 
 import 'package:devis_facture_gg_intervention/screens/signature_screen.dart'; // Écran de signature
-import 'package:devis_facture_gg_intervention/services/devis_service.dart'; // Service pour sauvegarder devis
-import 'package:devis_facture_gg_intervention/services/email_service.dart'; // Service pour envoyer email avec PDF
+import 'package:devis_facture_gg_intervention/services/devis_service.dart'; // Service pour sauvegarder les devis
+import 'package:devis_facture_gg_intervention/services/email_service.dart'; // Service pour envoyer les email en PDF
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle, Uint8List; // Pour charger assets et gérer les images/signatures
+import 'package:flutter/services.dart'
+    show
+        rootBundle,
+        Uint8List; // Pour charger assets et gérer les images/signatures
 import 'package:path_provider/path_provider.dart'; // Pour accéder au stockage temporaire
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw; // Bibliothèque PDF pour générer des documents
+import 'package:pdf/widgets.dart'
+    as pw; // Bibliothèque PDF pour générer des documents
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart'; // Pour afficher le PDF dans l'app
 import '../models/client.dart'; // Modèle client
-import '../models/item_line.dart'; // Modèle ligne de devis
+import '../models/item_line.dart'; // Modèle ligne des devis
 import '../services/client_service.dart';
 
 class DevisPreviewScreen extends StatefulWidget {
@@ -34,6 +39,7 @@ class DevisPreviewScreen extends StatefulWidget {
 }
 
 class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
+  bool get isSigned => signature != null;
   final DevisService _devisService = DevisService();
   final ClientService _clientService = ClientService();
 
@@ -41,8 +47,11 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   Uint8List? signature; // Signature sous forme d'image
   bool isLoading = true; // Indicateur de chargement
 
+  String? devisId; // On stocke le devisId généré ici
+
   // Calculs pour la facture
-  double get baseHt => widget.items.fold(0.0, (sum, item) => sum + item.totalHt);
+  double get baseHt =>
+      widget.items.fold(0.0, (sum, item) => sum + item.totalHt);
   double get montantTva => baseHt * (widget.tvaPercent / 100);
   double get totalTtc => baseHt + montantTva;
 
@@ -51,6 +60,16 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     super.initState();
     signature = widget.signatureBytes; // Récupérer la signature si déjà fournie
     _initGeneratePdf(); // Générer le PDF dès le lancement de l'écran
+  }
+
+  // Fonction pour générer un identifiant unique de devis
+  String generateDevisId() {
+    final now = DateTime.now();
+    final datePart = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final suffix = now.millisecondsSinceEpoch.toString().substring(
+      now.millisecondsSinceEpoch.toString().length - 5,
+    );
+    return 'DEVIS-n°$datePart-$suffix';
   }
 
   // Fonction pour générer le PDF avec gestion de l'état loading et erreurs
@@ -78,11 +97,17 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   // Fonction qui construit le PDF et l'enregistre dans un fichier temporaire
   Future<void> _generatePdf() async {
     final pdf = pw.Document();
-    final devisNumber = 'DEV-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+
+    // Générer et stocker le devisId dans la variable d'instance
+    devisId = generateDevisId();
 
     // Charger les polices et logo depuis les assets
-    final font = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Regular.ttf'));
-    final fontBold = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Bold.ttf'));
+    final font = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
+    );
+    final fontBold = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
+    );
     final logoData = await rootBundle.load('assets/images/logo-gg.png');
     final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
 
@@ -100,7 +125,10 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                 children: [
                   pw.Image(logoImage, width: 80),
                   pw.SizedBox(height: 8),
-                  pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
+                  pw.Text(
+                    'GG Intervention',
+                    style: pw.TextStyle(font: fontBold),
+                  ),
                   pw.Text('59 rue de Verdansk'),
                   pw.Text('57000 Metz, France'),
                   pw.Text('gg.intervention@gmail.com'),
@@ -111,29 +139,39 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('Client :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    'Client :',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
                   pw.Text('${widget.client.prenom} ${widget.client.nom}'),
                   pw.Text(widget.client.adresse),
                   pw.Text(widget.client.email),
                   pw.Text(widget.client.telephone),
-                  pw.Text('Numéro du devis : $devisNumber'),
+                  pw.Text('Numéro du devis : $devisId'),
                 ],
               ),
             ],
           ),
           pw.SizedBox(height: 30),
           pw.Center(
-            child: pw.Text('DEVIS', style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold)),
+            child: pw.Text(
+              'DEVIS',
+              style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold),
+            ),
           ),
           pw.SizedBox(height: 20),
           pw.TableHelper.fromTextArray(
             headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
-            data: widget.items.map((item) => [
-              item.description,
-              item.qty.toString(),
-              '${item.puHt.toStringAsFixed(2)} €',
-              '${item.totalHt.toStringAsFixed(2)} €',
-            ]).toList(),
+            data: widget.items
+                .map(
+                  (item) => [
+                    item.description,
+                    item.qty.toString(),
+                    '${item.puHt.toStringAsFixed(2)} €',
+                    '${item.totalHt.toStringAsFixed(2)} €',
+                  ],
+                )
+                .toList(),
           ),
           pw.SizedBox(height: 20),
           pw.Container(
@@ -142,9 +180,16 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Text('Base HT : ${baseHt.toStringAsFixed(2)} €'),
-                pw.Text('TVA (${widget.tvaPercent.toStringAsFixed(2)}%) : ${montantTva.toStringAsFixed(2)} €'),
-                pw.Text('Total TTC : ${totalTtc.toStringAsFixed(2)} €',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                pw.Text(
+                  'TVA (${widget.tvaPercent.toStringAsFixed(2)}%) : ${montantTva.toStringAsFixed(2)} €',
+                ),
+                pw.Text(
+                  'Total TTC : ${totalTtc.toStringAsFixed(2)} €',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
               ],
             ),
           ),
@@ -176,7 +221,9 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     // Enregistre le PDF dans un fichier temporaire
     final output = await getTemporaryDirectory();
     final formattedDate = widget.devisDate.toIso8601String().split('T').first;
-    final file = File('${output.path}/devis_${widget.client.nom}_$formattedDate.pdf');
+    final file = File(
+      '${output.path}/devis_${widget.client.nom}_$formattedDate.pdf',
+    );
 
     await file.writeAsBytes(await pdf.save());
 
@@ -191,12 +238,18 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
 
     try {
       // Envoi l'email avec le PDF
-      await sendEmailWithPdf(pdfFile!, widget.client.email);
+      await sendEmailWithPdf(
+        pdfFile: pdfFile!,
+        clientEmail: widget.client.email,
+        clientNom: widget.client.nom,
+        devisId: devisId ?? '',
+        isSigned: isSigned,
+      );
 
-      // Sauvegarde le client dans ta base locale ou backend
-      await _clientService.saveClient(widget.client); 
+      // Sauvegarde le client dans la base locale ou backend
+      await _clientService.saveClient(widget.client);
 
-      // Sauvegarde le devis dans ta base ou backend
+      // Sauvegarde le devis dans la base ou backend
       await _devisService.saveDevis(
         client: widget.client,
         date: widget.devisDate,
@@ -205,14 +258,23 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         baseHt: baseHt,
         tva: montantTva,
         totalTtc: totalTtc,
+        isSigned: isSigned,
       );
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Devis envoyé et sauvegardé !")),
+        const SnackBar(content: Text("✅ Devis confirmé et envoyé.")),
       );
-      Navigator.of(context).pop();
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Redirige vers le Dashboard et supprime toutes les routes précédentes
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        (Route<dynamic> route) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -220,7 +282,6 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -241,8 +302,8 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
             : pdfFile == null
-                ? const Center(child: Text('Erreur lors du chargement du PDF'))
-                : SfPdfViewer.file(pdfFile!),
+            ? const Center(child: Text('Erreur lors du chargement du PDF'))
+            : SfPdfViewer.file(pdfFile!),
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -251,20 +312,24 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
           children: [
             ElevatedButton.icon(
               onPressed: () async {
-                // Ouvre l'écran de signature et récupère l'image de la signature
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const SignatureScreen()),
                 );
+                
                 if (result != null && result is Uint8List) {
                   setState(() {
                     signature = result;
                     isLoading = true;
                   });
-                  await _generatePdf(); 
+                  await _generatePdf();
                   setState(() {
                     isLoading = false;
                   });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Signature enregistrée.")),
+                  );
                 }
               },
               icon: const Icon(Icons.edit),
@@ -272,8 +337,13 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
             const SizedBox(height: 12),
@@ -284,8 +354,13 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: bleuNuit,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
