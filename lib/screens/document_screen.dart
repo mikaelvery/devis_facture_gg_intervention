@@ -107,16 +107,6 @@ class DocumentScreen extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  '© 2025 GG Intervention',
-                  style: TextStyle(
-                    color: blanc.withAlpha(128),
-                    fontSize: 14,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -130,9 +120,10 @@ class DocumentScreen extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const DevisFormScreen()),
           );
         },
-        child: const Icon(Icons.add, size: 32, color: blanc),
+        child: const Icon(Icons.add, size: 40, color: blanc),
       ),
       bottomNavigationBar: Container(
+        height: 60,
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         decoration: BoxDecoration(
           color: blanc,

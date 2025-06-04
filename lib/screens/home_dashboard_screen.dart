@@ -1,12 +1,74 @@
-import 'package:devis_facture_gg_intervention/screens/document_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:devis_facture_gg_intervention/screens/document_screen.dart';
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  DateTimeRange? selectedDateRange;
+
+  // Simule des stats en fonction de la plage
+  Map<String, String> getStats() {
+    if (selectedDateRange == null) {
+      // Stats par défaut (année en cours)
+      return {
+        'Total encaissé': '12 345 €',
+        'Devis en attente de signature': '2749,99',
+        'Facture en attente de paiement': '800,00',
+        'Facture en retard': '758,20',
+      };
+    } else {
+      // Stats mock filtrées sur la plage sélectionnée (à remplacer par ta BDD)
+      return {
+        'Total encaissé': '9 876 €',
+        'Devis en attente de signature': '1235,12',
+        'Facture en attente de paiement': '500,49 €',
+        'Facture en retard': '649 €',
+      };
+    }
+  }
+
+  Future<void> _pickDateRange() async {
+    final now = DateTime.now();
+    final initialDateRange = selectedDateRange ??
+        DateTimeRange(
+          start: DateTime(now.year, 1, 1),
+          end: now,
+        );
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: initialDateRange,
+      helpText: 'Sélectionnez une plage de dates',
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDateRange = picked;
+      });
+    }
+  }
+
+  String _formatDateRange() {
+    if (selectedDateRange == null) {
+      return 'Année en cours';
+    }
+    final f = DateFormat('dd/MM/yyyy');
+    return '${f.format(selectedDateRange!.start)} - ${f.format(selectedDateRange!.end)}';
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final stats = getStats();
+
     return Scaffold(
       backgroundColor: bleuNuit,
       extendBody: true,
@@ -34,22 +96,20 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         color: bleuNuit,
                         fontWeight: FontWeight.bold,
-                        fontSize: 26,
+                        fontSize: 32,
                       ),
                     ),
-                    const SizedBox(height: 6),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.calendar_today, color: bleuNuit, size: 18),
-                      label: const Text('Année en cours', style: TextStyle(color: bleuNuit)),
+                      label: Text(_formatDateRange(),
+                          style: const TextStyle(color: bleuNuit)),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         backgroundColor: blanc,
                         elevation: 1,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () {
-                        // Action date picker
-                      },
+                      onPressed: _pickDateRange,
                     ),
                   ],
                 ),
@@ -68,20 +128,18 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            CardStat(title: 'Total encaissé'),
-            SizedBox(height: 12),
-            CardStat(title: 'Devis en attente de signature'),
-            SizedBox(height: 12),
-            CardStat(title: 'Facture en attente de paiement'),
-            SizedBox(height: 12),
-            CardStat(title: 'Facture en retard'),
-          ],
-        ),
+      body: Padding(  
+        
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: stats.entries.map((entry) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: CardStat(title: entry.key, value: entry.value),
+              );
+            }).toList(),
+          ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
@@ -92,9 +150,10 @@ class DashboardScreen extends StatelessWidget {
             MaterialPageRoute(builder: (context) => const DocumentScreen()),
           );
         },
-        child: const Icon(Icons.add, size: 32, color: blanc),
+        child: const Icon(Icons.add, size: 40, color: blanc),
       ),
       bottomNavigationBar: Container(
+        height: 60,
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         decoration: BoxDecoration(
           color: blanc,
@@ -141,8 +200,9 @@ class DashboardScreen extends StatelessWidget {
 
 class CardStat extends StatelessWidget {
   final String title;
+  final String value;
 
-  const CardStat({super.key, required this.title});
+  const CardStat({super.key, required this.title, this.value = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +226,14 @@ class CardStat extends StatelessWidget {
               color: bleuNuit,
             ),
           ),
-          const Icon(Icons.arrow_forward_ios, size: 16, color: bleuNuit),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: bleuNuit,
+            ),
+          ),
         ],
       ),
     );

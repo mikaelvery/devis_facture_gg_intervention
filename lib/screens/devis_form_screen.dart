@@ -55,46 +55,15 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
     _clientPaysController.text = client.pays;
   }
 
-  Future<void> _pickDate() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: devisDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        devisDate = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          devisDate.hour,
-          devisDate.minute,
-          devisDate.second,
-        );
-      });
-    }
-  }
-
-  Future<void> _pickTime() async {
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: devisDate.hour, minute: devisDate.minute),
-    );
-
-    if (pickedTime != null) {
-      setState(() {
-        devisDate = DateTime(
-          devisDate.year,
-          devisDate.month,
-          devisDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-          0,
-        );
-      });
-    }
+  bool _areClientFieldsValid() {
+  return _clientPrenomController.text.trim().isNotEmpty &&
+    _clientNomController.text.trim().isNotEmpty &&
+    _clientAdresseController.text.trim().isNotEmpty &&
+    _clientEmailController.text.trim().isNotEmpty &&
+    _clientTelephoneController.text.trim().isNotEmpty &&
+    _clientCodePostalController.text.trim().isNotEmpty &&
+    _clientVilleController.text.trim().isNotEmpty &&
+    _clientPaysController.text.trim().isNotEmpty;
   }
 
   void _updateItem(int index, ItemLine newItem) {
@@ -239,7 +208,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
     super.dispose();
   }
 
-  void _clearClientForm() { // vide les input du formulaire une fois le changement de client 
+  void _clearClientForm() {   // vide les input du formulaire une fois le changement de client 
     _clientIdController.clear();
     _clientPrenomController.clear();
     _clientNomController.clear();
@@ -253,9 +222,6 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('dd/MM/yyyy').format(devisDate.toLocal());
-    final formattedTime = DateFormat('HH:mm').format(devisDate.toLocal());
-    // ClientSearchWidget(onClientSelected: _fillClientForm);
 
     return Scaffold(
       backgroundColor: bleuNuit,
@@ -426,16 +392,39 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                 width: 220,
                 child: ElevatedButton(
                   onPressed: () {
-                    final client = Client(
-                      id: _clientIdController.text,
-                      prenom: _clientPrenomController.text,
-                      nom: _clientNomController.text,
-                      adresse: _clientAdresseController.text,
-                      email: _clientEmailController.text,
-                      telephone: _clientTelephoneController.text,
-                      codePostal: _clientCodePostalController.text,
-                      ville: _clientVilleController.text,
-                      pays: _clientPaysController.text,
+                    if (_selectedClient == null && !_areClientFieldsValid()) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Veuillez remplir tous les champs du client."),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
+                    final client = _selectedClient ??
+                        Client(
+                          id: _clientIdController.text,
+                          prenom: _clientPrenomController.text,
+                          nom: _clientNomController.text,
+                          adresse: _clientAdresseController.text,
+                          email: _clientEmailController.text,
+                          telephone: _clientTelephoneController.text,
+                          codePostal: _clientCodePostalController.text,
+                          ville: _clientVilleController.text,
+                          pays: _clientPaysController.text,
+                        );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DevisPreviewScreen(
+                          client: client,
+                          items: items,
+                          tvaPercent: tvaPercent,
+                          devisDate: devisDate,
+                        ),
+                      ),
                     );
 
                     Navigator.push(
@@ -451,7 +440,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withAlpha(50), // 'withValues' -> 'withAlpha'
+                    backgroundColor: Colors.white.withAlpha(50),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
