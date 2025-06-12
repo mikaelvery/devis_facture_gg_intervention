@@ -14,7 +14,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
   final SignatureController _controller = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.black,
-    exportBackgroundColor: blanc,
+    exportBackgroundColor: white,
   );
 
   bool _hasSigned = false;
@@ -44,6 +44,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
   Future<void> _saveSignature() async {
     if (_controller.isNotEmpty) {
       final Uint8List? data = await _controller.toPngBytes();
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(data);
     }
   }
@@ -54,15 +55,12 @@ class _SignatureScreenState extends State<SignatureScreen> {
       appBar: AppBar(
         title: const Text('Signer le devis'),
         centerTitle: true,
-        backgroundColor: bleuNuit,
-        foregroundColor: blanc,
+        backgroundColor: midnightBlue,
+        foregroundColor: white,
       ),
       body: Stack(
         children: [
-          Signature(
-            controller: _controller,
-            backgroundColor: blanc,
-          ),
+          Signature(controller: _controller, backgroundColor: white),
           if (_hasSigned)
             Positioned(
               bottom: 20,
@@ -94,7 +92,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                   ),
                 ],
               ),
-            )
+            ),
         ],
       ),
     );

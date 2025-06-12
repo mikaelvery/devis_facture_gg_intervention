@@ -24,20 +24,35 @@ class Client {
   });
 
   Map<String, dynamic> toMap() => {
-    'nom': nom,
-    'prenom': prenom,
-    'email': email,
-    'telephone': telephone,
-    'adresse': adresse,
-    'codePostal': codePostal,
-    'ville': ville,
-    'pays': pays,
-  };
+        'id': id,
+        'nom': nom,
+        'prenom': prenom,
+        'email': email,
+        'telephone': telephone,
+        'adresse': adresse,
+        'codePostal': codePostal,
+        'ville': ville,
+        'pays': pays,
+      };
 
   factory Client.fromDocument(DocumentSnapshot doc) {
     final map = doc.data() as Map<String, dynamic>;
     return Client(
       id: doc.id,
+      nom: map['nom'] ?? '',
+      prenom: map['prenom'] ?? '',
+      email: map['email'] ?? '',
+      telephone: map['telephone'] ?? '',
+      adresse: map['adresse'] ?? '',
+      codePostal: map['codePostal'] ?? '',
+      ville: map['ville'] ?? '',
+      pays: map['pays'] ?? '',
+    );
+  }
+
+  factory Client.fromMap(Map<String, dynamic> map) {
+    return Client(
+      id: map['id'] ?? '',
       nom: map['nom'] ?? '',
       prenom: map['prenom'] ?? '',
       email: map['email'] ?? '',

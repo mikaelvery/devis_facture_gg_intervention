@@ -4,6 +4,7 @@ import '../models/client.dart';
 
 class DevisService {
   Future<void> saveDevis({
+    required String devisId,
     required Client client,
     required DateTime date,
     required List<ItemLine> services,
@@ -15,6 +16,7 @@ class DevisService {
   }) async {
     final Timestamp timestamp = Timestamp.fromDate(date);
     final devisData = {
+      'devisId': devisId,
       'date': timestamp,
       'client': client.toMap(),
       'services': services.map((s) => s.toMap()).toList(),

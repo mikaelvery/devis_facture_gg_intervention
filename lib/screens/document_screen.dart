@@ -1,13 +1,10 @@
+import 'package:devis_facture_gg_intervention/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
 import 'package:devis_facture_gg_intervention/screens/devis_form_screen.dart';
 
 class DocumentScreen extends StatelessWidget {
   const DocumentScreen({super.key});
-
-  static const Color bleuNuit = Color(0xFF0B1B3F);
-  static const Color blanc = Colors.white;
-  static const Color orange = Colors.orange;
 
   static const List<ButtonInfo> boutons = [
     ButtonInfo('Nouveau devis', Icons.description),
@@ -38,18 +35,18 @@ class DocumentScreen extends StatelessWidget {
     double fontSize = 15;
 
     return Scaffold(
-      backgroundColor: bleuNuit,
+      backgroundColor: midnightBlue,
       appBar: AppBar(
         title: const Text(
           'Générer un nouveau document',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: DocumentScreen.blanc,
+            color: white,
           ),
         ),
-        backgroundColor: bleuNuit,
+        backgroundColor: midnightBlue,
         automaticallyImplyLeading: true,
-        iconTheme: const IconThemeData(color: blanc),
+        iconTheme: const IconThemeData(color: white),
         elevation: 0,
       ),
       body: SafeArea(
@@ -73,7 +70,7 @@ class DocumentScreen extends StatelessWidget {
                     return GestureDetector(
                       onTap: () => _handleButtonPress(context, btn.label),
                       child: Card(
-                        color: blanc,
+                        color: white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -86,19 +83,27 @@ class DocumentScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Icon(btn.icon, size: iconSize, color: bleuNuit),
+                                  Icon(
+                                    btn.icon,
+                                    size: iconSize,
+                                    color: midnightBlue,
+                                  ),
                                   const SizedBox(width: 14),
                                   Text(
                                     btn.label,
                                     style: TextStyle(
-                                      color: bleuNuit,
+                                      color: midnightBlue,
                                       fontWeight: FontWeight.w600,
                                       fontSize: fontSize,
                                     ),
                                   ),
                                 ],
                               ),
-                              Icon(Icons.arrow_forward_ios, color: orange, size: 20),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                color: orange,
+                                size: 20,
+                              ),
                             ],
                           ),
                         ),
@@ -120,13 +125,13 @@ class DocumentScreen extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const DevisFormScreen()),
           );
         },
-        child: const Icon(Icons.add, size: 40, color: blanc),
+        child: const Icon(Icons.add, size: 40, color: white),
       ),
       bottomNavigationBar: Container(
         height: 60,
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         decoration: BoxDecoration(
-          color: blanc,
+          color: white,
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
@@ -144,7 +149,7 @@ class DocumentScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: const Icon(Icons.home, color: bleuNuit),
+                icon: const Icon(Icons.home, color: midnightBlue),
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
@@ -154,7 +159,7 @@ class DocumentScreen extends StatelessWidget {
                 tooltip: 'Accueil',
               ),
               IconButton(
-                icon: const Icon(Icons.description, color: bleuNuit),
+                icon: const Icon(Icons.description, color: midnightBlue),
                 onPressed: () {
                   // On est déjà ici
                 },
@@ -162,14 +167,14 @@ class DocumentScreen extends StatelessWidget {
               ),
               const SizedBox(width: 40),
               IconButton(
-                icon: const Icon(Icons.people, color: bleuNuit),
+                icon: const Icon(Icons.people, color: midnightBlue),
                 onPressed: () {
                   //  Navigation vers Clients
                 },
                 tooltip: 'Clients',
               ),
               IconButton(
-                icon: const Icon(Icons.settings, color: bleuNuit),
+                icon: const Icon(Icons.settings, color: midnightBlue),
                 onPressed: () {
                   //  Navigation vers Paramètres
                 },
@@ -191,9 +196,9 @@ class DocumentScreen extends StatelessWidget {
         );
         break;
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Action: $label')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Action: $label')));
     }
   }
 }

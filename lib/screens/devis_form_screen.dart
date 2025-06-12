@@ -7,10 +7,7 @@ import '../widgets/client_search.dart';
 import '../widgets/item_line_form.dart';
 import 'devis_preview_screen.dart';
 
-
-
 class DevisFormScreen extends StatefulWidget {
-  
   const DevisFormScreen({super.key});
 
   @override
@@ -56,14 +53,14 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
   }
 
   bool _areClientFieldsValid() {
-  return _clientPrenomController.text.trim().isNotEmpty &&
-    _clientNomController.text.trim().isNotEmpty &&
-    _clientAdresseController.text.trim().isNotEmpty &&
-    _clientEmailController.text.trim().isNotEmpty &&
-    _clientTelephoneController.text.trim().isNotEmpty &&
-    _clientCodePostalController.text.trim().isNotEmpty &&
-    _clientVilleController.text.trim().isNotEmpty &&
-    _clientPaysController.text.trim().isNotEmpty;
+    return _clientPrenomController.text.trim().isNotEmpty &&
+        _clientNomController.text.trim().isNotEmpty &&
+        _clientAdresseController.text.trim().isNotEmpty &&
+        _clientEmailController.text.trim().isNotEmpty &&
+        _clientTelephoneController.text.trim().isNotEmpty &&
+        _clientCodePostalController.text.trim().isNotEmpty &&
+        _clientVilleController.text.trim().isNotEmpty &&
+        _clientPaysController.text.trim().isNotEmpty;
   }
 
   void _updateItem(int index, ItemLine newItem) {
@@ -101,7 +98,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: bleuNuit,
+              color: midnightBlue,
             ),
           ),
         ),
@@ -125,14 +122,14 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             style: TextButton.styleFrom(
-              foregroundColor: bleuNuit,
+              foregroundColor: midnightBlue,
               textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
             onPressed: () => _addItem(type),
-            icon: const Icon(Icons.add_circle_outline, color: blanc),
+            icon: const Icon(Icons.add_circle_outline, color: white),
             label: Text(
               type == 'service' ? "Ajouter un service" : "Ajouter du matériel",
-              style: const TextStyle(color: blanc),
+              style: const TextStyle(color: white),
             ),
           ),
         ),
@@ -162,7 +159,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.07),
+        fillColor: Colors.white.withValues(alpha: 0.1),
       ),
     );
   }
@@ -178,7 +175,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontSize: isBold ? 18 : 16,
-              color: blanc,
+              color: white,
             ),
           ),
           Text(
@@ -186,7 +183,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontSize: isBold ? 18 : 16,
-              color: blanc,
+              color: white,
             ),
           ),
         ],
@@ -208,7 +205,8 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
     super.dispose();
   }
 
-  void _clearClientForm() {   // vide les input du formulaire une fois le changement de client 
+  void _clearClientForm() {
+    // vide les input du formulaire une fois le changement de client
     _clientIdController.clear();
     _clientPrenomController.clear();
     _clientNomController.clear();
@@ -222,16 +220,15 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: bleuNuit,
+      backgroundColor: midnightBlue,
       appBar: AppBar(
         title: const Text(
           "Nouveau Devis",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: bleuNuit,
+        backgroundColor: midnightBlue,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
@@ -270,9 +267,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                     child: _buildTextField(_clientPrenomController, 'Prénom'),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(_clientNomController, 'Nom'),
-                  ),
+                  Expanded(child: _buildTextField(_clientNomController, 'Nom')),
                 ],
               ),
               const SizedBox(height: 12),
@@ -395,14 +390,17 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                     if (_selectedClient == null && !_areClientFieldsValid()) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text("Veuillez remplir tous les champs du client."),
+                          content: Text(
+                            "Veuillez remplir tous les champs du client.",
+                          ),
                           backgroundColor: Colors.red,
                         ),
                       );
                       return;
                     }
 
-                    final client = _selectedClient ??
+                    final client =
+                        _selectedClient ??
                         Client(
                           id: _clientIdController.text,
                           prenom: _clientPrenomController.text,

@@ -2,7 +2,7 @@ class ItemLine {
   final String description;
   final int qty;
   final double puHt;
-  final String type; 
+  final String type;
 
   ItemLine({
     required this.description,
@@ -34,4 +34,13 @@ class ItemLine {
         'totalHt': totalHt,
         'type': type,
       };
+
+  factory ItemLine.fromMap(Map<String, dynamic> map) {
+    return ItemLine(
+      description: map['description'] ?? '',
+      qty: map['quantite'] ?? 0,
+      puHt: (map['puHt'] as num).toDouble(),
+      type: map['type'] ?? '',
+    );
+  }
 }

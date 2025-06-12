@@ -15,7 +15,6 @@ class ClientService {
         ...client.toMap(),
         'searchKeywords': searchKeywords,
       });
-      // Retourner le client avec l'id généré par Firestore
       return client.copyWith(id: docRef.id);
     } else {
       // Client existant -> update()

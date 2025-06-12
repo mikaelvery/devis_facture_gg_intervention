@@ -68,11 +68,13 @@ class _ItemLineFormState extends State<ItemLineForm> {
       'prix': 265.0,
     },
     'Recherche de fuite n2': {
-      'description': 'Utilisation de caméra thermique / inspection ou avec destruction',
+      'description':
+          'Utilisation de caméra thermique / inspection ou avec destruction',
       'prix': 350.0,
     },
     'Mise en sécurité provisoire': {
-      'description': 'Coupure d\'eau, fermeture d\'une ouverture <1m2, pose serrure provisoire',
+      'description':
+          'Coupure d\'eau, fermeture d\'une ouverture <1m2, pose serrure provisoire',
       'prix': 130.0,
     },
     'Ouverture de porte radio': {
@@ -96,7 +98,9 @@ class _ItemLineFormState extends State<ItemLineForm> {
     super.initState();
 
     titreController = TextEditingController(text: widget.item.description);
-    quantiteController = TextEditingController(text: widget.item.qty.toString());
+    quantiteController = TextEditingController(
+      text: widget.item.qty.toString(),
+    );
     puHtController = TextEditingController(
       text: widget.item.puHt > 0 ? widget.item.puHt.toStringAsFixed(2) : '',
     );
@@ -106,15 +110,19 @@ class _ItemLineFormState extends State<ItemLineForm> {
     puHtFocusNode = FocusNode();
     puHtFocusNode.addListener(() {
       if (puHtFocusNode.hasFocus) {
-        if (puHtController.text == '0.00' || puHtController.text == '00.00' || puHtController.text.isEmpty) {
+        if (puHtController.text == '0.00' ||
+            puHtController.text == '00.00' ||
+            puHtController.text.isEmpty) {
           puHtController.clear();
         }
       }
     });
 
-    if (selectedType == 'service' && servicesDetails.containsKey(widget.item.description)) {
+    if (selectedType == 'service' &&
+        servicesDetails.containsKey(widget.item.description)) {
       selectedTva = 10;
-      puHtController.text = servicesDetails[widget.item.description]!['prix'].toStringAsFixed(2);
+      puHtController.text = servicesDetails[widget.item.description]!['prix']
+          .toStringAsFixed(2);
     }
   }
 
@@ -146,7 +154,9 @@ class _ItemLineFormState extends State<ItemLineForm> {
     setState(() {
       titreController.text = value;
       if (servicesDetails.containsKey(value)) {
-        puHtController.text = servicesDetails[value]!['prix'].toStringAsFixed(2);
+        puHtController.text = servicesDetails[value]!['prix'].toStringAsFixed(
+          2,
+        );
       } else {
         puHtController.text = '';
       }
@@ -162,7 +172,6 @@ class _ItemLineFormState extends State<ItemLineForm> {
     final cardTitle = '$prefix ${widget.index + 1}';
 
     return Card(
-      
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -185,61 +194,80 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
             // Champ titre/service avec autocomplete si service
             if (selectedType == 'service')
-            Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text.isEmpty) return const Iterable<String>.empty();
-                return serviceSuggestions.where((option) =>
-                  option.toLowerCase().contains(textEditingValue.text.toLowerCase()));
-                },
-                onSelected: onServiceSelected,
-                fieldViewBuilder: (context, fieldTextEditingController, focusNode, onEditingComplete) {
-                  fieldTextEditingController.text = titreController.text;
-                  fieldTextEditingController.selection = titreController.selection;
-
-                  return TextField(
-                    controller: fieldTextEditingController,
-                    focusNode: focusNode,
-                    decoration: InputDecoration(
-                      labelText: 'Titre',
-                      labelStyle: TextStyle(color: bleuNuit),
-                      floatingLabelStyle: TextStyle(color: bleuNuit),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: bleuNuit),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: bleuNuit, width: 2),
-                      ),
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) {
+                    return const Iterable<String>.empty();
+                  }
+                  return serviceSuggestions.where(
+                    (option) => option.toLowerCase().contains(
+                      textEditingValue.text.toLowerCase(),
                     ),
-                    onChanged: (value) {
-                      titreController.text = value;
-                      updateItem();
-                    },
-                    onEditingComplete: onEditingComplete,
                   );
                 },
+                onSelected: onServiceSelected,
+                fieldViewBuilder:
+                    (
+                      context,
+                      fieldTextEditingController,
+                      focusNode,
+                      onEditingComplete,
+                    ) {
+                      fieldTextEditingController.text = titreController.text;
+                      fieldTextEditingController.selection =
+                          titreController.selection;
+
+                      return TextField(
+                        controller: fieldTextEditingController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: 'Titre',
+                          labelStyle: TextStyle(color: midnightBlue),
+                          floatingLabelStyle: TextStyle(color: midnightBlue),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: midnightBlue),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: midnightBlue,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          titreController.text = value;
+                          updateItem();
+                        },
+                        onEditingComplete: onEditingComplete,
+                      );
+                    },
               )
             else
               TextField(
                 controller: titreController,
                 decoration: InputDecoration(
                   labelText: 'Titre',
-                  labelStyle: TextStyle(color: bleuNuit),
-                  floatingLabelStyle: TextStyle(color: bleuNuit),
+                  labelStyle: TextStyle(color: midnightBlue),
+                  floatingLabelStyle: TextStyle(color: midnightBlue),
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: bleuNuit),
+                    borderSide: BorderSide(color: midnightBlue),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: bleuNuit, width: 2),
+                    borderSide: BorderSide(color: midnightBlue, width: 2),
                   ),
                 ),
                 onChanged: (_) => updateItem(),
@@ -247,14 +275,16 @@ class _ItemLineFormState extends State<ItemLineForm> {
             const SizedBox(height: 14),
 
             // Description service + TVA si service
-            if (selectedType == 'service' && servicesDetails.containsKey(titreController.text.trim()))
+            if (selectedType == 'service' &&
+                servicesDetails.containsKey(titreController.text.trim()))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      servicesDetails[titreController.text.trim()]!['description'],
+                      servicesDetails[titreController.text
+                          .trim()]!['description'],
                       style: const TextStyle(
                         fontStyle: FontStyle.italic,
                         color: Colors.black54,
@@ -268,15 +298,20 @@ class _ItemLineFormState extends State<ItemLineForm> {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(width: 24),
-                        const Text('TVA:', style: TextStyle(fontWeight: FontWeight.w600)),
+                        const Text(
+                          'TVA:',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         const SizedBox(width: 8),
                         DropdownButton<double>(
                           value: selectedTva,
                           items: tvaRates
-                              .map((rate) => DropdownMenuItem(
-                                    value: rate,
-                                    child: Text('$rate %'),
-                                  ))
+                              .map(
+                                (rate) => DropdownMenuItem(
+                                  value: rate,
+                                  child: Text('$rate %'),
+                                ),
+                              )
                               .toList(),
                           onChanged: (value) {
                             if (value != null) {
@@ -296,97 +331,102 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
             // Ligne Quantité, Unité, Prix Unitaire HT
             Row(
-  children: [
-    Expanded(
-      child: TextField(
-        controller: quantiteController,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: 'Quantité',
-          labelStyle: TextStyle(color: bleuNuit),
-          floatingLabelStyle: TextStyle(color: bleuNuit),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: bleuNuit),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: bleuNuit, width: 2),
-          ),
-        ),
-        onChanged: (_) => updateItem(),
-      ),
-    ),
-    const SizedBox(width: 14),
-    Expanded(
-      child: DropdownButtonFormField<String>(
-        value: selectedUnite,
-        items: uniteOptions
-            .map((u) => DropdownMenuItem(
-                  value: u,
-                  child: Text(u),
-                ))
-            .toList(),
-              decoration: InputDecoration(
-                labelText: 'Unité',
-                labelStyle: TextStyle(color: bleuNuit),
-                floatingLabelStyle: TextStyle(color: bleuNuit),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: bleuNuit),
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: quantiteController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Quantité',
+                      labelStyle: TextStyle(color: midnightBlue),
+                      floatingLabelStyle: TextStyle(color: midnightBlue),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: midnightBlue),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: midnightBlue, width: 2),
+                      ),
+                    ),
+                    onChanged: (_) => updateItem(),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: bleuNuit, width: 2),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedUnite,
+                    items: uniteOptions
+                        .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                        .toList(),
+                    decoration: InputDecoration(
+                      labelText: 'Unité',
+                      labelStyle: TextStyle(color: midnightBlue),
+                      floatingLabelStyle: TextStyle(color: midnightBlue),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: midnightBlue),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: midnightBlue, width: 2),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedUnite = value;
+                        });
+                        updateItem();
+                      }
+                    },
+                  ),
                 ),
-              ),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    selectedUnite = value;
-                  });
-                  updateItem();
-                }
-              },
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: TextField(
-              controller: puHtController,
-              focusNode: puHtFocusNode,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: TextField(
+                    controller: puHtController,
+                    focusNode: puHtFocusNode,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: false,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: 'Prix Unitaire HT (€)',
+                      labelStyle: TextStyle(color: midnightBlue),
+                      floatingLabelStyle: TextStyle(color: midnightBlue),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: midnightBlue),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: midnightBlue, width: 2),
+                      ),
+                    ),
+                    onChanged: (_) => updateItem(),
+                  ),
+                ),
               ],
-              decoration: InputDecoration(
-                labelText: 'Prix Unitaire HT (€)',
-                labelStyle: TextStyle(color: bleuNuit),
-                floatingLabelStyle: TextStyle(color: bleuNuit),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: bleuNuit),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: bleuNuit, width: 2),
-                ),
-              ),
-              onChanged: (_) => updateItem(),
             ),
-          ),
-        ],
-      ),
-
 
             const SizedBox(height: 18),
 
@@ -400,7 +440,10 @@ class _ItemLineFormState extends State<ItemLineForm> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

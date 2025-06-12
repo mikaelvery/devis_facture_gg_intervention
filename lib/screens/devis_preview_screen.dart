@@ -1,6 +1,6 @@
-import 'dart:io'; 
+import 'dart:io';
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
-import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart'; 
+import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
 import 'package:devis_facture_gg_intervention/screens/signature_screen.dart'; // Écran de signature
 import 'package:devis_facture_gg_intervention/services/devis_service.dart'; // Service pour sauvegarder les devis
 import 'package:devis_facture_gg_intervention/services/email_service.dart'; // Service pour envoyer les email en PDF
@@ -47,7 +47,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   Uint8List? signature; // Signature sous forme d'image
   bool isLoading = true; // Indicateur de chargement
 
-  String? devisId; // On stocke le devisId généré ici
+  String? devisId; // stock le devisId généré ici
 
   // Calculs pour la facture
   double get baseHt =>
@@ -65,7 +65,8 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   // Fonction pour générer un identifiant unique de devis
   String generateDevisId() {
     final now = DateTime.now();
-    final datePart = '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    final datePart =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final suffix = now.millisecondsSinceEpoch.toString().substring(
       now.millisecondsSinceEpoch.toString().length - 5,
     );
@@ -108,7 +109,9 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     final fontBold = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
     );
-    final logoData = await rootBundle.load('assets/images/logo-gg.png');
+    final logoData = await rootBundle.load(
+      'assets/images/logo-gg.png',
+    );
     final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
 
     // Construire le contenu de la page PDF
@@ -246,12 +249,13 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         isSigned: isSigned,
       );
 
-      // Sauvegarde le client dans la base locale ou backend
+      // Sauvegarde le client dans la base
       await _clientService.saveClient(widget.client);
 
-      // Sauvegarde le devis dans la base ou backend
+      // Sauvegarde le devis dans firebase
       await _devisService.saveDevis(
         client: widget.client,
+        devisId: devisId!,
         date: widget.devisDate,
         services: widget.items.where((i) => i.type == 'service').toList(),
         materiel: widget.items.where((i) => i.type == 'materiel').toList(),
@@ -269,17 +273,18 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
 
       await Future.delayed(const Duration(milliseconds: 500));
 
-      // Redirige vers le Dashboard et supprime toutes les routes précédentes
+      // Retour vers le Dashboard
       Navigator.pushAndRemoveUntil(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
         (Route<dynamic> route) => false,
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Erreur : $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Erreur : $e")));
     }
   }
 
@@ -287,7 +292,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B1B3F),
+        backgroundColor: midnightBlue,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -316,7 +321,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                   context,
                   MaterialPageRoute(builder: (_) => const SignatureScreen()),
                 );
-                
+
                 if (result != null && result is Uint8List) {
                   setState(() {
                     signature = result;
@@ -327,6 +332,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                     isLoading = false;
                   });
 
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Signature enregistrée.")),
                   );
@@ -352,7 +358,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               icon: const Icon(Icons.save),
               label: const Text('Confirmer & envoyer'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: bleuNuit,
+                backgroundColor: midnightBlue,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
