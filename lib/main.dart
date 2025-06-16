@@ -125,7 +125,7 @@ class MyApp extends StatelessWidget {
       title: 'GG Intervention Devis et Factures',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const SplashScreen(), // redirigera automatiquement selon l'état de connexion
+      home: const SplashScreen(),
       routes: {
         '/screens/devis_form': (context) => const DevisFormScreen(),
         '/screens/dashboard': (context) => const DashboardScreen(),

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:devis_facture_gg_intervention/screens/notification_screen.dart';
+import 'package:devis_facture_gg_intervention/screens/splash_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:devis_facture_gg_intervention/screens/document_screen.dart';
@@ -38,10 +40,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _logoutUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('authToken');
-    // peux aussi clear() pour tout supprimer
-    // await prefs.clear();
+    await FirebaseAuth.instance.signOut();
+
+  // Optionnel : supprimer les infos stockées en local si tu utilises SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('savedEmail');
+    await prefs.remove('savedPassword');
+
+    // Puis retourne à l'écran de login ou splash
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const SplashScreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _pickDateRange() async {
@@ -264,6 +275,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     onPressed: () async {
                                       Navigator.of(context).pop();
 
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Déconnexion en cours...')),
+                                      );
                                       // supprime les données de session ou token
                                       await _logoutUser();
 
@@ -371,7 +385,7 @@ class CardStat extends StatelessWidget {
   final String title;
   final String value;
 
-  const CardStat({super.key, required this.title, this.value = ''});
+  const CardStat({super.key, required this.title, required this.value});
 
   @override
   Widget build(BuildContext context) {

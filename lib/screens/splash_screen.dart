@@ -18,11 +18,14 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   bool _rememberMe = false;
   bool _isLoggingIn = false;
   bool _loginSuccess = false;
   String? _errorMessage;
   bool _obscurePassword = true;
+  bool _isCheckingLogin = true;
 
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
@@ -51,13 +54,38 @@ class _SplashScreenState extends State<SplashScreen>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
-    _loadSavedCredentials();
+    _loadSavedCredentials().then((_) {
+      _checkIfUserIsAlreadyLoggedIn();
+    });
+  }
+
+  Future<void> _checkIfUserIsAlreadyLoggedIn() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'fcmToken': token,
+        }, SetOptions(merge: true));
+      }
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      );
+    } else if (_rememberMe && _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+      await _onLoginPressed();
+    } else {
+      if (mounted) {
+        setState(() {
+          _isCheckingLogin = false;
+        });
+      }
+    }
   }
 
   void _listenToTokenRefresh() {
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
       final user = FirebaseAuth.instance.currentUser;
-
       if (user != null) {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'fcmToken': newToken,
@@ -79,7 +107,6 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
-
   Future<void> _onLoginPressed() async {
     setState(() {
       _isLoggingIn = true;
@@ -94,11 +121,9 @@ class _SplashScreenState extends State<SplashScreen>
 
       final user = cred.user;
       if (user != null) {
-        final String uid = user.uid;
-        final String? token = await FirebaseMessaging.instance.getToken();
-
+        final token = await FirebaseMessaging.instance.getToken();
         if (token != null) {
-          await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
             'email': user.email,
             'fcmToken': token,
           }, SetOptions(merge: true));
@@ -114,19 +139,16 @@ class _SplashScreenState extends State<SplashScreen>
         await prefs.remove('savedPassword');
       }
 
-
       setState(() => _loginSuccess = true);
       _controller.forward();
 
       await Future.delayed(const Duration(seconds: 3));
       if (!mounted) return;
-
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } on FirebaseAuthException catch (e) {
       String message;
-
       switch (e.code) {
         case 'wrong-password':
           message = "Mot de passe incorrect.";
@@ -166,311 +188,152 @@ class _SplashScreenState extends State<SplashScreen>
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Center(
-          child: _loginSuccess ? _buildSplashAnimation() : _buildLoginForm(),
+          child: _isCheckingLogin
+              ? _buildSplashAnimation()
+              : (_loginSuccess ? _buildSplashAnimation() : _buildLoginForm()),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSplashAnimation() {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: const Text(
+          'Bienvenue',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
   Widget _buildLoginForm() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          // Animation de translation + opacité
-          final slide =
-              Tween<Offset>(
-                begin: const Offset(0, 0.2),
-                end: Offset.zero,
-              ).animate(
-                CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-              );
-          final fade = Tween<double>(begin: 0, end: 1).animate(_controller);
+    return Form(
+      key: _formKey,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final slide = Tween<Offset>(
+              begin: const Offset(0, 0.2),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-          return FadeTransition(
-            opacity: fade,
-            child: SlideTransition(position: slide, child: child),
-          );
-        },
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withValues(alpha: 0.9),
-                  Colors.white.withValues(alpha: 0.8),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+            final fade = Tween<double>(begin: 0, end: 1).animate(_controller);
+
+            return FadeTransition(
+              opacity: fade,
+              child: SlideTransition(
+                position: slide,
+                child: child,
               ),
-              border: Border.all(color: Colors.grey.shade300, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: blueAccent.withValues(alpha: 0.3),
-                  blurRadius: 16,
-                  spreadRadius: 1,
-                  offset: Offset(0, 0),
+            );
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Connexion",
+                style: GoogleFonts.poppins(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: darkBlue,
                 ),
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 24,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Connexion",
-                  style: GoogleFonts.poppins(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: darkBlue,
+              ),
+              const SizedBox(height: 24),
+              _textField(
+                controller: _emailController,
+                hintText: "Email",
+                icon: Icons.email,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 20),
+              _textField(
+                controller: _passwordController,
+                hintText: "Mot de passe",
+                icon: Icons.lock,
+                obscureText: _obscurePassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: blueAccent.withAlpha(180),
                   ),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
-                const SizedBox(height: 24),
-
-                // Email
-                _animatedTextField(
-                  controller: _emailController,
-                  hintText: 'Email',
-                  icon: Icons.email,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un email';
-                    }
-                    if (!value.contains('@')) return 'Email invalide';
-                    return null;
-                  },
-                  setState: setState,
-                  blueAccent: Colors.blueAccent,
-                ),
-
-                const SizedBox(height: 20),
-
-                // Password
-                _animatedTextField(
-                  controller: _passwordController,
-                  hintText: 'Mot de passe',
-                  icon: Icons.lock,
-                  obscureText: _obscurePassword,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: blueAccent.withValues(alpha: 0.7),
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _rememberMe,
+                    activeColor: blueAccent,
+                    onChanged: (val) =>
+                        setState(() => _rememberMe = val ?? false),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un mot de passe';
-                    }
-                    if (value.length < 6) return 'Mot de passe trop court';
-                    return null;
-                  },
-                  setState: setState,
-                  blueAccent: blueAccent,
-                ),
-                const SizedBox(height: 16),
-
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      activeColor: blueAccent,
-                      onChanged: (val) =>
-                          setState(() => _rememberMe = val ?? false),
-                    ),
-                    const Text(
-                      "Se souvenir de moi",
-                      style: TextStyle(
-                        color: darkBlue,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(
-                      color: Colors.redAccent,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  const Text("Se souvenir de moi"),
                 ],
-
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoggingIn ? null : _onLoginPressed,
-                    style:
-                        ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          backgroundColor: blueAccent,
-                          elevation: 8,
-                          shadowColor: blueAccent.withValues(alpha: 0.6),
-                        ).copyWith(
-                          overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                            (states) {
-                              if (states.contains(WidgetState.pressed)) {
-                                return blueAccent.withValues(alpha: 0.8);
-                              }
-                              if (states.contains(WidgetState.hovered)) {
-                                return blueAccent.withValues(alpha: 0.6);
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                    child: _isLoggingIn
-                        ? SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                              strokeWidth: 3,
-                            ),
-                          )
-                        : Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                'Se connecter',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Icon(
-                                Icons.arrow_forward_rounded,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ],
-                          ),
+              ),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
-              ],
-            ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _isLoggingIn
+                    ? null
+                    : () {
+                        if (_formKey.currentState!.validate()) {
+                          _onLoginPressed();
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: blueAccent,
+                ),
+                child: _isLoggingIn
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Se connecter"),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Widget personnalisé pour les TextField avec ombre au focus et animation simple
-  Widget _animatedTextField({
+  Widget _textField({
     required TextEditingController controller,
     required String hintText,
     required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
     bool obscureText = false,
     Widget? suffixIcon,
-    String? Function(String?)? validator,
-    required StateSetter setState,
-    required Color blueAccent,
+    TextInputType? keyboardType,
   }) {
-    return Focus(
-      onFocusChange: (hasFocus) => setState(() {}),
-      child: Builder(
-        builder: (context) {
-          final hasFocus = Focus.of(context).hasFocus;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: hasFocus
-                    ? blueAccent.withValues(alpha: 0.9)
-                    : Colors.grey.shade300,
-                width: hasFocus ? 2.5 : 1.0,
-              ),
-              boxShadow: hasFocus
-                  ? [
-                      BoxShadow(
-                        color: blueAccent.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : [],
-            ),
-            child: TextFormField(
-              controller: controller,
-              keyboardType: keyboardType,
-              obscureText: obscureText,
-              validator: validator,
-              decoration: InputDecoration(
-                hintText: hintText,
-                prefixIcon: Icon(icon, color: Colors.black),
-                filled: true,
-                fillColor: blueAccent.withAlpha(13),
-                border: InputBorder.none,
-                suffixIcon: suffixIcon,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSplashAnimation() {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/logo-gg-devis-facture.png',
-              width: 200,
-              filterQuality: FilterQuality.high,
-            ),
-            const SizedBox(height: 50),
-            Text(
-              'Bon retour Guillaume, tu nous as manqué !',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: darkBlue,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
-                letterSpacing: 0.3,
-              ),
-            ),
-            const SizedBox(height: 30),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(blueAccent),
-              strokeWidth: 2.5,
-            ),
-          ],
-        ),
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Champ requis';
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: darkBlue),
+        suffixIcon: suffixIcon,
+        hintText: hintText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
