@@ -30,8 +30,6 @@ class DocumentScreen extends StatelessWidget {
     }
 
     final double spacing = 12.0;
-
-    // Cards plus petites, on réduit iconSize & fontSize
     double iconSize = 28;
     double fontSize = 15;
 

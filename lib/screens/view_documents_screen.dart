@@ -143,7 +143,7 @@ class ViewDocumentsScreen extends StatelessWidget {
               var doc = devisList[index];
               final data = doc.data() as Map<String, dynamic>;
 
-              // Récupération sécurisée des données client
+              // Récupération des données client
               final clientData = data['client'] as Map<String, dynamic>? ?? {};
               final nom = clientData['nom'] ?? 'Nom inconnu';
               final prenom = clientData['prenom'] ?? 'Prénom inconnu';
@@ -159,13 +159,10 @@ class ViewDocumentsScreen extends StatelessWidget {
               final montantFormatted =
                   NumberFormat.currency(locale: 'fr_FR', symbol: '€')
                       .format(montantTtc);
-
               // Numéro du devis
               final numero = data['devisId'] ?? doc.id;
-
               // Statut signé
               final isSigned = data['isSigned'] ?? false;
-
               // Gestion de la date
               final Timestamp? timestamp =
                   (data['createdAt'] as Timestamp?) ?? (data['date'] as Timestamp?);
@@ -307,7 +304,7 @@ class ViewDocumentsScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: () {
-                                // Implémenter l'envoi par mail
+                                // Implémenter l'envoi par mail ???
                               },
                               icon: const Icon(Icons.mail),
                               label: const Text('Envoyer par mail'),
@@ -339,7 +336,6 @@ class ViewDocumentsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Ligne 1
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

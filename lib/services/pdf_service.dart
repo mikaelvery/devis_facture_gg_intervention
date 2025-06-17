@@ -17,7 +17,7 @@ class PdfService {
     required String devisId,
     required double baseHt,
     required bool isSigned,
-    String? signatureUrl, // base64
+    String? signatureUrl,
   }) async {
     final pdf = pw.Document();
 

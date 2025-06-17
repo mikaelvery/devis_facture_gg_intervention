@@ -6,18 +6,16 @@ class ClientService {
       FirebaseFirestore.instance.collection('clients');
 
   Future<Client> saveClient(Client client) async {
-    // Générer les keywords pour la recherche
+    // Génére les keywords pour la recherche
     final searchKeywords = _generateKeywords(client);
 
     if (client.id.isEmpty) {
-      // Nouveau client -> add()
       final docRef = await _clientsCollection.add({
         ...client.toMap(),
         'searchKeywords': searchKeywords,
       });
       return client.copyWith(id: docRef.id);
     } else {
-      // Client existant -> update()
       await _clientsCollection.doc(client.id).update({
         ...client.toMap(),
         'searchKeywords': searchKeywords,

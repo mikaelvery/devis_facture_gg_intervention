@@ -43,12 +43,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _logoutUser() async {
     await FirebaseAuth.instance.signOut();
 
-  // Optionnel : supprimer les infos stockées en local si tu utilises SharedPreferences
+  // supprime les infos stockées en local via SharedPreferences
   final prefs = await SharedPreferences.getInstance();
     await prefs.remove('savedEmail');
     await prefs.remove('savedPassword');
 
-    // Puis retourne à l'écran de login ou splash
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const SplashScreen()),
@@ -149,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onPressed: _pickDateRange,
                       child: Row(
                         mainAxisSize: MainAxisSize
-                            .min, // pour que le bouton prenne juste la taille du contenu
+                            .min,
                         children: [
                           Text(
                             _formatDateRange(),
@@ -279,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('Déconnexion en cours...')),
                                       );
-                                      // supprime les données de session ou token
+                                      // supprime les données de session token
                                       await _logoutUser();
 
                                       Navigator.of(
@@ -439,7 +438,7 @@ class CardStat extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Colonne texte (titre + montant)
+          // Colonne texte titre + montant
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,7 +463,6 @@ class CardStat extends StatelessWidget {
             ),
           ),
 
-          // Chevron à droite
           Icon(
             Icons.chevron_right,
             color: const Color.fromARGB(255, 0, 0, 0).withAlpha(150),

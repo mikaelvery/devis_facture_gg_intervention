@@ -2,22 +2,22 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
-import 'package:devis_facture_gg_intervention/screens/signature_screen.dart'; // Écran de signature
-import 'package:devis_facture_gg_intervention/services/devis_service.dart'; // Service pour sauvegarder les devis
-import 'package:devis_facture_gg_intervention/services/email_service.dart'; // Service pour envoyer les email en PDF
+import 'package:devis_facture_gg_intervention/screens/signature_screen.dart'; 
+import 'package:devis_facture_gg_intervention/services/devis_service.dart'; 
+import 'package:devis_facture_gg_intervention/services/email_service.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show
         rootBundle,
-        Uint8List; // Pour charger assets et gérer les images/signatures
+        Uint8List; 
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart'; // Pour accéder au stockage temporaire
+import 'package:path_provider/path_provider.dart'; 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart'
-    as pw; // Bibliothèque PDF pour générer des documents
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart'; // Pour afficher le PDF dans l'app
-import '../models/client.dart'; // Modèle client
-import '../models/item_line.dart'; // Modèle ligne des devis
+    as pw; 
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart'; 
+import '../models/client.dart'; 
+import '../models/item_line.dart'; 
 import '../services/client_service.dart';
 
 class DevisPreviewScreen extends StatefulWidget {
@@ -114,7 +114,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     final logoData = await rootBundle.load('assets/images/logo-gg.png');
     final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
 
-    // Construire le contenu de la page PDF
+    // Construction du contenu de la page PDF
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -281,7 +281,6 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
 
       await Future.delayed(const Duration(milliseconds: 500));
 
-      // Retour vers le Dashboard
       Navigator.pushAndRemoveUntil(
         // ignore: use_build_context_synchronously
         context,

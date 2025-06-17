@@ -236,10 +236,10 @@ class _ClientSearchWidgetState extends State<ClientSearchWidget> {
               onPressed: () {
                 widget.onClientSelected(
                   null,
-                ); // on dit au parent qu'il n'y a plus de client
+                );
                 setState(() {
                   _selectedClient =
-                      null; // on remet l’état à zéro dans le widget
+                      null;
                 });
               },
 

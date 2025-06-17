@@ -8,7 +8,7 @@ class ItemLineForm extends StatefulWidget {
   final Function(ItemLine) onUpdate;
   final VoidCallback onRemove;
   final bool isMaterielOnly;
-  final int index; // Index pour numéroter le titre (1, 2, 3...)
+  final int index;
 
   const ItemLineForm({
     required this.item,
@@ -181,7 +181,6 @@ class _ItemLineFormState extends State<ItemLineForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Titre de la card
             Text(
               cardTitle,
               style: const TextStyle(
@@ -192,7 +191,6 @@ class _ItemLineFormState extends State<ItemLineForm> {
             ),
             const SizedBox(height: 12),
 
-            // Champ titre/service avec autocomplete si service
             if (selectedType == 'service')
               Autocomplete<String>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
@@ -274,7 +272,6 @@ class _ItemLineFormState extends State<ItemLineForm> {
               ),
             const SizedBox(height: 14),
 
-            // Description service + TVA si service
             if (selectedType == 'service' &&
                 servicesDetails.containsKey(titreController.text.trim()))
               Padding(
@@ -329,7 +326,6 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
             const SizedBox(height: 14),
 
-            // Ligne Quantité, Unité, Prix Unitaire HT
             Row(
               children: [
                 Expanded(
@@ -427,10 +423,8 @@ class _ItemLineFormState extends State<ItemLineForm> {
                 ),
               ],
             ),
-
             const SizedBox(height: 18),
 
-            // Bouton Supprimer
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
