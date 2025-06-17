@@ -13,8 +13,12 @@ class DevisService {
     required double tva,
     required double totalTtc,
     required bool isSigned,
+    DateTime? signedAt,
+    String? signatureUrl,        
   }) async {
     final Timestamp timestamp = Timestamp.fromDate(date);
+    final Timestamp? signedTimestamp = signedAt != null ? Timestamp.fromDate(signedAt) : null;
+
     final devisData = {
       'devisId': devisId,
       'date': timestamp,
@@ -25,8 +29,12 @@ class DevisService {
       'tva': tva,
       'totalTtc': totalTtc,
       'isSigned': isSigned,
+      'signedAt': signedTimestamp,        
+      'signatureUrl': signatureUrl,   
     };
 
-    await FirebaseFirestore.instance.collection('devis').add(devisData);
+    await FirebaseFirestore.instance
+      .collection('devis')
+      .add(devisData);
   }
 }

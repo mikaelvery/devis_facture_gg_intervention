@@ -36,7 +36,11 @@ class Client {
       };
 
   factory Client.fromDocument(DocumentSnapshot doc) {
-    final map = doc.data() as Map<String, dynamic>;
+  final data = doc.data();
+  if (data == null) {
+    throw Exception('Document ${doc.id} is null');
+  }
+  final map = data as Map<String, dynamic>;
     return Client(
       id: doc.id,
       nom: map['nom'] ?? '',
@@ -49,6 +53,7 @@ class Client {
       pays: map['pays'] ?? '',
     );
   }
+
 
   factory Client.fromMap(Map<String, dynamic> map) {
     return Client(

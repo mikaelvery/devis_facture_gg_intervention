@@ -424,18 +424,6 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                         ),
                       ),
                     );
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DevisPreviewScreen(
-                          client: client,
-                          items: items,
-                          tvaPercent: tvaPercent,
-                          devisDate: devisDate,
-                        ),
-                      ),
-                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white.withAlpha(50),

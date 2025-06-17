@@ -1,4 +1,5 @@
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
+import 'package:devis_facture_gg_intervention/screens/view_documents_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
 import 'package:devis_facture_gg_intervention/screens/devis_form_screen.dart';
@@ -117,70 +118,89 @@ class DocumentScreen extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: orange,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const DevisFormScreen()),
-          );
-        },
-        child: const Icon(Icons.add, size: 40, color: white),
-      ),
-      bottomNavigationBar: Container(
-        height: 60,
-        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        decoration: BoxDecoration(
-          color: white,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(40),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        floatingActionButton: Transform.translate(
+          offset: const Offset(0, 10),
+          child: FloatingActionButton(
+            backgroundColor: orange,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DocumentScreen()),
+              );
+            },
+            child: const Icon(Icons.add, size: 40, color: white),
+          ),
         ),
-        child: BottomAppBar(
-          color: Colors.transparent,
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.home, color: midnightBlue),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const DashboardScreen()),
-                  );
-                },
-                tooltip: 'Accueil',
-              ),
-              IconButton(
-                icon: const Icon(Icons.description, color: midnightBlue),
-                onPressed: () {
-                  // On est déjà ici
-                },
-                tooltip: 'Documents',
-              ),
-              const SizedBox(width: 40),
-              IconButton(
-                icon: const Icon(Icons.people, color: midnightBlue),
-                onPressed: () {
-                  //  Navigation vers Clients
-                },
-                tooltip: 'Clients',
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings, color: midnightBlue),
-                onPressed: () {
-                  //  Navigation vers Paramètres
-                },
-                tooltip: 'Paramètres',
+      bottomNavigationBar: SafeArea(
+        bottom: true,
+        child: Container(
+          height: 60,
+          margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          decoration: BoxDecoration(
+            color: white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(40),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(32),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                      );
+                    },
+                    child: const Center(
+                      child: Icon(Icons.home, color: midnightBlue, size: 24),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(32),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ViewDocumentsScreen()),
+                      );
+                    },
+                    child: const Center(
+                      child: Icon(Icons.description, color: midnightBlue, size: 24),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 40), 
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(32),
+                    onTap: () {},
+                    child: const Center(
+                      child: Icon(Icons.people, color: midnightBlue, size: 24),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(32),
+                    onTap: () {},
+                    child: const Center(
+                      child: Icon(Icons.settings, color: midnightBlue, size: 24),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

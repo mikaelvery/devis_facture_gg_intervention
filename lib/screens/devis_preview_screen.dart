@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart'
     show
         rootBundle,
         Uint8List; // Pour charger assets et gérer les images/signatures
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart'; // Pour accéder au stockage temporaire
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart'
@@ -70,7 +72,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     final suffix = now.millisecondsSinceEpoch.toString().substring(
       now.millisecondsSinceEpoch.toString().length - 5,
     );
-    return 'DEVIS-n°$datePart-$suffix';
+    return 'Devis n°$datePart-$suffix';
   }
 
   // Fonction pour générer le PDF avec gestion de l'état loading et erreurs
@@ -109,9 +111,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     final fontBold = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
     );
-    final logoData = await rootBundle.load(
-      'assets/images/logo-gg.png',
-    );
+    final logoData = await rootBundle.load('assets/images/logo-gg.png');
     final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
 
     // Construire le contenu de la page PDF
@@ -132,8 +132,8 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                     'GG Intervention',
                     style: pw.TextStyle(font: fontBold),
                   ),
-                  pw.Text('59 rue de Verdansk'),
-                  pw.Text('57000 Metz, France'),
+                  pw.Text('30 rue général de gaulle'),
+                  pw.Text('57050 Longeville-Lès-Metz, France'),
                   pw.Text('gg.intervention@gmail.com'),
                   pw.Text('+33 6 45 19 06 94'),
                 ],
@@ -182,12 +182,14 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text('Base HT : ${baseHt.toStringAsFixed(2)} €'),
                 pw.Text(
-                  'TVA (${widget.tvaPercent.toStringAsFixed(2)}%) : ${montantTva.toStringAsFixed(2)} €',
+                  'Base HT : ${NumberFormat.decimalPattern('fr_FR').format(baseHt)} €',
                 ),
                 pw.Text(
-                  'Total TTC : ${totalTtc.toStringAsFixed(2)} €',
+                  'TVA (${widget.tvaPercent.toStringAsFixed(2)}%) : ${NumberFormat.decimalPattern('fr_FR').format(montantTva)} €',
+                ),
+                pw.Text(
+                  'Total TTC : ${NumberFormat.decimalPattern('fr_FR').format(totalTtc)} €',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     fontSize: 14,
@@ -240,6 +242,8 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     if (pdfFile == null) return;
 
     try {
+      final DateTime? signedAt = isSigned ? DateTime.now() : null;
+
       // Envoi l'email avec le PDF
       await sendEmailWithPdf(
         pdfFile: pdfFile!,
@@ -263,6 +267,10 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         tva: montantTva,
         totalTtc: totalTtc,
         isSigned: isSigned,
+        signedAt: signedAt,
+        signatureUrl: signature != null
+            ? 'data:image/png;base64,${base64Encode(signature!)}'
+            : null,
       );
 
       if (!mounted) return;

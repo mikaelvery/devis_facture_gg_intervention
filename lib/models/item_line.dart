@@ -36,11 +36,14 @@ class ItemLine {
       };
 
   factory ItemLine.fromMap(Map<String, dynamic> map) {
+    final dynamic puHtRaw = map['puHt'];
+
     return ItemLine(
       description: map['description'] ?? '',
-      qty: map['quantite'] ?? 0,
-      puHt: (map['puHt'] as num).toDouble(),
+      qty: (map['quantite'] ?? 0) as int,
+      puHt: puHtRaw is num ? puHtRaw.toDouble() : 0.0,
       type: map['type'] ?? '',
     );
   }
+
 }

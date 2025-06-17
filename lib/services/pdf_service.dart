@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -10,11 +11,13 @@ import '../models/item_line.dart';
 class PdfService {
   static Future<File> generateDevisPdf({
     required Client client,
-    required List<ItemLine> items,
+    required List<ItemLine> services,
     required double tvaPercent,
     required DateTime devisDate,
-    Uint8List? signatureBytes,
     required String devisId,
+    required double baseHt,
+    required bool isSigned,
+    String? signatureUrl, // base64
   }) async {
     final pdf = pw.Document();
 
@@ -27,9 +30,16 @@ class PdfService {
     final logoData = await rootBundle.load('assets/images/logo-gg.png');
     final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
 
-    final baseHt = items.fold(0.0, (sum, item) => sum + item.totalHt);
     final montantTva = baseHt * (tvaPercent / 100);
     final totalTtc = baseHt + montantTva;
+
+    Uint8List? signatureBytes;
+    if (isSigned &&
+        signatureUrl != null &&
+        signatureUrl.startsWith("data:image")) {
+      final base64Data = signatureUrl.split(',').last;
+      signatureBytes = base64Decode(base64Data);
+    }
 
     pdf.addPage(
       pw.MultiPage(
@@ -44,9 +54,12 @@ class PdfService {
                 children: [
                   pw.Image(logoImage, width: 80),
                   pw.SizedBox(height: 8),
-                  pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
-                  pw.Text('59 rue de Verdansk'),
-                  pw.Text('57000 Metz, France'),
+                  pw.Text(
+                    'GG Intervention',
+                    style: pw.TextStyle(font: fontBold),
+                  ),
+                  pw.Text('30 rue général de gaulle'),
+                  pw.Text('57050 Longeville-Lès-Metz, France'),
                   pw.Text('gg.intervention@gmail.com'),
                   pw.Text('+33 6 45 19 06 94'),
                 ],
@@ -55,24 +68,37 @@ class PdfService {
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('Client :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    'Client :',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
                   pw.Text('${client.prenom} ${client.nom}'),
-                  pw.Text(client.adresse),
+                  pw.Text(
+                    '${client.adresse}, ${client.codePostal} ${client.ville}',
+                  ),
+                  pw.Text(client.pays),
                   pw.Text(client.email),
                   pw.Text(client.telephone),
+                  pw.SizedBox(height: 5),
                   pw.Text('Numéro du devis : $devisId'),
+                  pw.Text(
+                    'Date : ${devisDate.day}/${devisDate.month}/${devisDate.year}',
+                  ),
                 ],
               ),
             ],
           ),
           pw.SizedBox(height: 30),
           pw.Center(
-            child: pw.Text('DEVIS', style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold)),
+            child: pw.Text(
+              'DEVIS',
+              style: pw.TextStyle(fontSize: 26, fontWeight: pw.FontWeight.bold),
+            ),
           ),
           pw.SizedBox(height: 20),
           pw.TableHelper.fromTextArray(
             headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
-            data: items
+            data: services
                 .map(
                   (item) => [
                     item.description,
@@ -90,10 +116,15 @@ class PdfService {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Text('Base HT : ${baseHt.toStringAsFixed(2)} €'),
-                pw.Text('TVA (${tvaPercent.toStringAsFixed(2)}%) : ${montantTva.toStringAsFixed(2)} €'),
+                pw.Text(
+                  'TVA (${tvaPercent.toStringAsFixed(2)}%) : ${montantTva.toStringAsFixed(2)} €',
+                ),
                 pw.Text(
                   'Total TTC : ${totalTtc.toStringAsFixed(2)} €',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),

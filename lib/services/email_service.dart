@@ -13,7 +13,7 @@ Future<void> sendEmailWithPdf({
 }) async {
   final now = DateTime.now();
   devisId ??=
-      'DEVIS-n°${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${now.millisecondsSinceEpoch.toString().substring(now.millisecondsSinceEpoch.toString().length - 5)}';
+      'Devis n°${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${now.millisecondsSinceEpoch.toString().substring(now.millisecondsSinceEpoch.toString().length - 5)}';
 
   final user = dotenv.env['EMAIL_USER']!;
   final pass = dotenv.env['EMAIL_PASS']!;
