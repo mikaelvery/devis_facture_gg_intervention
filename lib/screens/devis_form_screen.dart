@@ -139,30 +139,34 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
   }
 
   Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.white),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.1),
+  TextEditingController controller,
+  String label, {
+  TextInputType keyboardType = TextInputType.text,
+}) {
+  return TextField(
+    controller: controller,
+    keyboardType: keyboardType,
+    style: const TextStyle(color: Colors.white),
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.white70),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.white.withAlpha(100)),
+        borderRadius: BorderRadius.circular(8),
       ),
-    );
-  }
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.white),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      // Enlever filled et fillColor
+      // filled: true,
+      // fillColor: Colors.white.withAlpha(25),
+      isDense: true, // optionnel, pour un champ plus compact
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+    ),
+  );
+}
+
 
   Widget _buildSummaryRow(String label, double amount, {bool isBold = false}) {
     return Padding(
@@ -233,219 +237,223 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClientSearchWidget(
-              onClientSelected: (Client? client) {
-                setState(() {
-                  _selectedClient = client;
-                  if (client != null) {
-                    _fillClientForm(client);
-                  } else {
-                    _clearClientForm();
-                  }
-                });
-              },
-            ),
+        padding: const EdgeInsets.all(20),child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: MediaQuery.of(context).size.width - 40,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClientSearchWidget(
+                onClientSelected: (Client? client) {
+                  setState(() {
+                    _selectedClient = client;
+                    if (client != null) {
+                      _fillClientForm(client);
+                    } else {
+                      _clearClientForm();
+                    }
+                  });
+                },
+              ),
 
-            if (_selectedClient == null) ...[
-              SizedBox(height: 24),
+              if (_selectedClient == null) ...[
+                SizedBox(height: 24),
+                const Text(
+                  'Informations client',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(_clientPrenomController, 'Prénom'),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildTextField(_clientNomController, 'Nom')),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(_clientAdresseController, 'Adresse'),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        _clientEmailController,
+                        'Email',
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildTextField(
+                        _clientTelephoneController,
+                        'Téléphone',
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        _clientCodePostalController,
+                        'Code postal',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildTextField(_clientVilleController, 'Ville'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(_clientPaysController, 'Pays'),
+                const SizedBox(height: 24),
+              ],
+
               const Text(
-                'Informations client',
+                'Services',
                 style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              _buildItemList('Services', 'service'),
+
+              const SizedBox(height: 12),
+              const Text(
+                'Matériels',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              _buildItemList('Matériels', 'materiel'),
+
+              const SizedBox(height: 16),
+              const Text(
+                "TVA %",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(_clientPrenomController, 'Prénom'),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildTextField(_clientNomController, 'Nom')),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(_clientAdresseController, 'Adresse'),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      _clientEmailController,
-                      'Email',
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(
-                      _clientTelephoneController,
-                      'Téléphone',
-                      keyboardType: TextInputType.phone,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      _clientCodePostalController,
-                      'Code postal',
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(_clientVilleController, 'Ville'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(_clientPaysController, 'Pays'),
-              const SizedBox(height: 24),
-            ],
-
-            const Text(
-              'Services',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            _buildItemList('Services', 'service'),
-
-            const SizedBox(height: 12),
-            const Text(
-              'Matériels',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            _buildItemList('Matériels', 'materiel'),
-
-            const SizedBox(height: 16),
-            const Text(
-              "TVA %",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: DropdownButton<double>(
-                value: tvaPercent,
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: [0, 5.5, 10, 20].map((e) {
-                  return DropdownMenuItem(
-                    value: e.toDouble(),
-                    child: Text(
-                      e.toString(),
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      tvaPercent = value;
-                    });
-                  }
-                },
-              ),
-            ),
-
-            const Divider(height: 32, thickness: 2, color: Colors.white),
-
-            _buildSummaryRow('Montant HT', baseHt),
-            _buildSummaryRow(
-              'TVA (${tvaPercent.toStringAsFixed(1)}%)',
-              montantTva,
-            ),
-            _buildSummaryRow('Montant TTC', totalTtc, isBold: true),
-
-            const SizedBox(height: 24),
-            Center(
-              child: SizedBox(
-                width: 220,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_selectedClient == null && !_areClientFieldsValid()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Veuillez remplir tous les champs du client.",
-                          ),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
-                    }
-
-                    final client =
-                        _selectedClient ??
-                        Client(
-                          id: _clientIdController.text,
-                          prenom: _clientPrenomController.text,
-                          nom: _clientNomController.text,
-                          adresse: _clientAdresseController.text,
-                          email: _clientEmailController.text,
-                          telephone: _clientTelephoneController.text,
-                          codePostal: _clientCodePostalController.text,
-                          ville: _clientVilleController.text,
-                          pays: _clientPaysController.text,
-                        );
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DevisPreviewScreen(
-                          client: client,
-                          items: items,
-                          tvaPercent: tvaPercent,
-                          devisDate: devisDate,
-                        ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DropdownButton<double>(
+                  value: tvaPercent,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  items: [0, 5.5, 10, 20].map((e) {
+                    return DropdownMenuItem(
+                      value: e.toDouble(),
+                      child: Text(
+                        e.toString(),
+                        style: const TextStyle(color: Colors.black),
                       ),
                     );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        tvaPercent = value;
+                      });
+                    }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withAlpha(50),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              const Divider(height: 32, thickness: 2, color: Colors.white),
+
+              _buildSummaryRow('Montant HT', baseHt),
+              _buildSummaryRow(
+                'TVA (${tvaPercent.toStringAsFixed(1)}%)',
+                montantTva,
+              ),
+              _buildSummaryRow('Montant TTC', totalTtc, isBold: true),
+
+              const SizedBox(height: 24),
+              Center(
+                child: SizedBox(
+                  width: 220,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_selectedClient == null && !_areClientFieldsValid()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Veuillez remplir tous les champs du client.",
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      final client =
+                          _selectedClient ??
+                          Client(
+                            id: _clientIdController.text,
+                            prenom: _clientPrenomController.text,
+                            nom: _clientNomController.text,
+                            adresse: _clientAdresseController.text,
+                            email: _clientEmailController.text,
+                            telephone: _clientTelephoneController.text,
+                            codePostal: _clientCodePostalController.text,
+                            ville: _clientVilleController.text,
+                            pays: _clientPaysController.text,
+                          );
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DevisPreviewScreen(
+                            client: client,
+                            items: items,
+                            tvaPercent: tvaPercent,
+                            devisDate: devisDate,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white.withAlpha(50),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Visualiser PDF',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
+                    child: const Text(
+                      'Visualiser PDF',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

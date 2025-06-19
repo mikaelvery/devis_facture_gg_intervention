@@ -1,4 +1,5 @@
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
+import 'package:devis_facture_gg_intervention/screens/facture_screen.dart';
 import 'package:devis_facture_gg_intervention/screens/view_documents_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
@@ -61,22 +62,26 @@ class DocumentScreen extends StatelessWidget {
                     crossAxisCount: crossAxisCount,
                     mainAxisSpacing: spacing,
                     crossAxisSpacing: spacing,
-                    childAspectRatio: 4, // plus allongé horizontalement
+                    childAspectRatio: 4,
                   ),
                   itemCount: boutons.length,
                   itemBuilder: (context, i) {
                     final btn = boutons[i];
+
                     return GestureDetector(
                       onTap: () => _handleButtonPress(context, btn.label),
                       child: Card(
-                        color: white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
                         elevation: 4,
-                        shadowColor: Colors.black26,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14), 
+                        ),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: 8,
+                        ), 
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -85,7 +90,7 @@ class DocumentScreen extends StatelessWidget {
                                   Icon(
                                     btn.icon,
                                     size: iconSize,
-                                    color: midnightBlue,
+                                    color: green,
                                   ),
                                   const SizedBox(width: 14),
                                   Text(
@@ -100,7 +105,7 @@ class DocumentScreen extends StatelessWidget {
                               ),
                               Icon(
                                 Icons.arrow_forward_ios,
-                                color: orange,
+                                color: green,
                                 size: 20,
                               ),
                             ],
@@ -116,19 +121,19 @@ class DocumentScreen extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Transform.translate(
-          offset: const Offset(0, 10),
-          child: FloatingActionButton(
-            backgroundColor: orange,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const DocumentScreen()),
-              );
-            },
-            child: const Icon(Icons.add, size: 40, color: white),
-          ),
+      floatingActionButton: Transform.translate(
+        offset: const Offset(0, 10),
+        child: FloatingActionButton(
+          backgroundColor: green,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DocumentScreen()),
+            );
+          },
+          child: const Icon(Icons.add, size: 40, color: white),
         ),
+      ),
       bottomNavigationBar: SafeArea(
         bottom: true,
         child: Container(
@@ -178,7 +183,7 @@ class DocumentScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 40), 
+                const SizedBox(width: 40),
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(32),
@@ -213,10 +218,16 @@ class DocumentScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => const DevisFormScreen()),
         );
         break;
-      default:
-        ScaffoldMessenger.of(
+      case 'Nouvelle facture':
+        Navigator.push(
           context,
-        ).showSnackBar(SnackBar(content: Text('Action: $label')));
+          MaterialPageRoute(builder: (_) => const FactureScreen()),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Action: $label')),
+        );
     }
   }
 }

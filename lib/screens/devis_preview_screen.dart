@@ -68,7 +68,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   String generateDevisId() {
     final now = DateTime.now();
     final datePart =
-        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+      '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final suffix = now.millisecondsSinceEpoch.toString().substring(
       now.millisecondsSinceEpoch.toString().length - 5,
     );

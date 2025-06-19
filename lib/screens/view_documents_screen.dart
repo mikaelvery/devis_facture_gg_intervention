@@ -29,19 +29,19 @@ class ViewDocumentsScreen extends StatelessWidget {
         centerTitle: true,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Transform.translate(
-          offset: const Offset(0, 10), 
-          child: FloatingActionButton(
+      floatingActionButton: Transform.translate(
+        offset: const Offset(0, 10),
+        child: FloatingActionButton(
             backgroundColor: orange,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const DocumentScreen()),
-              );
-            },
-            child: const Icon(Icons.add, size: 40, color: white),
-          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DocumentScreen()),
+            );
+          },
+          child: const Icon(Icons.add, size: 40, color: white),
         ),
+      ),
       bottomNavigationBar: SafeArea(
         bottom: true,
         child: Container(
@@ -69,7 +69,9 @@ class ViewDocumentsScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const DashboardScreen(),
+                        ),
                       );
                     },
                     child: const Center(
@@ -83,15 +85,21 @@ class ViewDocumentsScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const ViewDocumentsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const ViewDocumentsScreen(),
+                        ),
                       );
                     },
                     child: const Center(
-                      child: Icon(Icons.description, color: midnightBlue, size: 24),
+                      child: Icon(
+                        Icons.description,
+                        color: midnightBlue,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 40), 
+                const SizedBox(width: 40),
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(32),
@@ -106,7 +114,11 @@ class ViewDocumentsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(32),
                     onTap: () {},
                     child: const Center(
-                      child: Icon(Icons.settings, color: midnightBlue, size: 24),
+                      child: Icon(
+                        Icons.settings,
+                        color: midnightBlue,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
@@ -126,15 +138,21 @@ class ViewDocumentsScreen extends StatelessWidget {
           }
           if (snapshot.hasError) {
             return Center(
-                child: Text('Erreur : ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red)));
+              child: Text(
+                'Erreur : ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
 
           final devisList = snapshot.data?.docs ?? [];
           if (devisList.isEmpty) {
             return const Center(
-                child: Text('Aucun devis trouvé',
-                    style: TextStyle(color: Colors.white70)));
+              child: Text(
+                'Aucun devis trouvé',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
           }
 
           return ListView.builder(
@@ -156,16 +174,18 @@ class ViewDocumentsScreen extends StatelessWidget {
               } else if (montantTtcRaw is double) {
                 montantTtc = montantTtcRaw;
               }
-              final montantFormatted =
-                  NumberFormat.currency(locale: 'fr_FR', symbol: '€')
-                      .format(montantTtc);
+              final montantFormatted = NumberFormat.currency(
+                locale: 'fr_FR',
+                symbol: '€',
+              ).format(montantTtc);
               // Numéro du devis
               final numero = data['devisId'] ?? doc.id;
               // Statut signé
               final isSigned = data['isSigned'] ?? false;
               // Gestion de la date
               final Timestamp? timestamp =
-                  (data['createdAt'] as Timestamp?) ?? (data['date'] as Timestamp?);
+                  (data['createdAt'] as Timestamp?) ??
+                  (data['date'] as Timestamp?);
               final DateTime? date = timestamp?.toDate();
               final dateFormatted = date != null
                   ? DateFormat('dd/MM/yyyy').format(date)
@@ -179,7 +199,9 @@ class ViewDocumentsScreen extends StatelessWidget {
                     context: context,
                     backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
                     builder: (_) {
                       return Padding(
@@ -197,20 +219,34 @@ class ViewDocumentsScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text('Client : $prenom $nom', style: TextStyle(color: midnightBlue)),
-                            Text('Numéro devis : $numero', style: TextStyle(color: midnightBlue)),
-                            Text('Montant TTC : $montantFormatted',
-                                style: TextStyle(color: midnightBlue)),
-                            Text('Date : $dateFormatted', style: TextStyle(color: midnightBlue)),
+                            Text(
+                              'Client : $prenom $nom',
+                              style: TextStyle(color: midnightBlue),
+                            ),
+                            Text(
+                              'Numéro devis : $numero',
+                              style: TextStyle(color: midnightBlue),
+                            ),
+                            Text(
+                              'Montant TTC : $montantFormatted',
+                              style: TextStyle(color: midnightBlue),
+                            ),
+                            Text(
+                              'Date : $dateFormatted',
+                              style: TextStyle(color: midnightBlue),
+                            ),
                             const SizedBox(height: 16),
                             Row(
                               children: [
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 8),
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: isSigned
-                                        ? const Color.fromARGB(255, 76, 175, 135)
+                                        ? green
+                                          
                                         : orange,
                                     borderRadius: BorderRadius.circular(30),
                                   ),
@@ -228,7 +264,9 @@ class ViewDocumentsScreen extends StatelessWidget {
                                       Text(
                                         isSigned ? 'Signé' : 'En attente',
                                         style: const TextStyle(
-                                            color: white, fontWeight: FontWeight.w500),
+                                          color: white,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -238,35 +276,51 @@ class ViewDocumentsScreen extends StatelessWidget {
                             const SizedBox(height: 20),
                             ElevatedButton.icon(
                               onPressed: () async {
-                                final clientMap = data['client'] as Map<String, dynamic>? ?? {};
+                                final clientMap =
+                                    data['client'] as Map<String, dynamic>? ??
+                                    {};
                                 final client = Client.fromMap(clientMap);
-                                final servicesList = (data['services'] as List<dynamic>?)
-                                  ?.map((e) => ItemLine.fromMap(e as Map<String, dynamic>))
-                                  .toList() ?? [];
-                                final tvaPercent = (data['tvaPercent'] as num?)?.toDouble() ?? 0.0;
-                                final baseHt = (data['baseHt'] as num?)?.toDouble() ?? 0.0;
+                                final servicesList =
+                                    (data['services'] as List<dynamic>?)
+                                        ?.map(
+                                          (e) => ItemLine.fromMap(
+                                            e as Map<String, dynamic>,
+                                          ),
+                                        )
+                                        .toList() ??
+                                    [];
+                                final tvaPercent =
+                                    (data['tvaPercent'] as num?)?.toDouble() ??
+                                    0.0;
+                                final baseHt =
+                                    (data['baseHt'] as num?)?.toDouble() ?? 0.0;
                                 final devisDate = date ?? DateTime.now();
                                 final devisId = data['devisId'] ?? '';
                                 final isSigned = data['isSigned'] ?? false;
                                 final signatureUrl = data['signatureUrl'] ?? '';
 
-                                final pdfFile = await PdfService.generateDevisPdf(
-                                  client: client,
-                                  services: servicesList,
-                                  tvaPercent: tvaPercent,
-                                  devisDate: devisDate,
-                                  devisId: devisId,
-                                  baseHt: baseHt,
-                                  isSigned: isSigned,
-                                  signatureUrl: signatureUrl,
-                                );
+                                final pdfFile =
+                                    await PdfService.generateDevisPdf(
+                                      client: client,
+                                      services: servicesList,
+                                      tvaPercent: tvaPercent,
+                                      devisDate: devisDate,
+                                      devisId: devisId,
+                                      baseHt: baseHt,
+                                      isSigned: isSigned,
+                                      signatureUrl: signatureUrl,
+                                    );
 
                                 if (!context.mounted) return;
                                 final bytes = await pdfFile.readAsBytes();
 
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) => PdfPreviewScreen(bytes: bytes),
-                                ));
+                                // ignore: use_build_context_synchronously
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        PdfPreviewScreen(bytes: bytes),
+                                  ),
+                                );
                               },
 
                               icon: const Icon(Icons.picture_as_pdf),
@@ -288,6 +342,7 @@ class ViewDocumentsScreen extends StatelessWidget {
                                       .collection('devis')
                                       .doc(doc.id)
                                       .update({'isSigned': true});
+                                  // ignore: use_build_context_synchronously
                                   Navigator.of(context).pop();
                                 },
                                 icon: const Icon(Icons.check),
@@ -328,9 +383,12 @@ class ViewDocumentsScreen extends StatelessWidget {
                   elevation: 4,
                   color: white,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -379,10 +437,12 @@ class ViewDocumentsScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
                             color: isSigned
-                                ? const Color.fromARGB(255, 76, 175, 135)
+                                ? green
                                 : orange,
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -398,9 +458,7 @@ class ViewDocumentsScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                isSigned
-                                    ? 'Signé'
-                                    : 'En attente de signature',
+                                isSigned ? 'Signé' : 'En attente de signature',
                                 style: const TextStyle(
                                   color: white,
                                   fontWeight: FontWeight.w500,

@@ -15,6 +15,7 @@ class ClientSearchWidget extends StatefulWidget {
 
 class _ClientSearchWidgetState extends State<ClientSearchWidget> {
   final TextEditingController _searchController = TextEditingController();
+  String searchQuery = '';
 
   List<Client> _filteredClients = [];
   Client? _selectedClient;
@@ -66,44 +67,47 @@ class _ClientSearchWidgetState extends State<ClientSearchWidget> {
   Widget build(BuildContext context) {
     return Container(
       color: midnightBlue,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _searchController,
-            style: const TextStyle(color: midnightBlue),
-            decoration: InputDecoration(
-              hintText: "Rechercher un client existant",
-              hintStyle: TextStyle(color: midnightBlue.withAlpha(150)),
-              prefixIcon: const Icon(Icons.search, color: Colors.black),
-              suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, color: Colors.black54),
-                    onPressed: () {
-                      _searchController.clear();
-                      _onSearchChanged('');
-                      FocusScope.of(context).unfocus();
-                    },
-                  )
-                : null,
-              filled: true,
-              fillColor: white,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: midnightBlue.withAlpha(100)),
+          SizedBox(
+            width: double.infinity,
+            child: TextField(
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: "Rechercher un client...",
+                  
+                hintStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                suffixIcon: searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.white),
+                        onPressed: () {
+                          setState(() {
+                            searchQuery = '';
+                          });
+                          FocusScope.of(context).unfocus();
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: Colors.white12,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: midnightBlue, width: 2),
-              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+                _onSearchChanged(value);
+              },
             ),
-            onChanged: (value) {
-              setState(() {}); 
-              _onSearchChanged(value);
-            },
           ),
+
           const SizedBox(height: 20),
 
           if (_filteredClients.isNotEmpty)

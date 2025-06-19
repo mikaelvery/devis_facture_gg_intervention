@@ -43,8 +43,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _logoutUser() async {
     await FirebaseAuth.instance.signOut();
 
-  // supprime les infos stockées en local via SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
+    // supprime les infos stockées en local via SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
     await prefs.remove('savedEmail');
     await prefs.remove('savedPassword');
 
@@ -147,8 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       onPressed: _pickDateRange,
                       child: Row(
-                        mainAxisSize: MainAxisSize
-                            .min,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             _formatDateRange(),
@@ -275,8 +274,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     onPressed: () async {
                                       Navigator.of(context).pop();
 
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Déconnexion en cours...')),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Déconnexion en cours...',
+                                          ),
+                                        ),
                                       );
                                       // supprime les données de session token
                                       await _logoutUser();
@@ -290,7 +295,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       );
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.orange,
+                                      backgroundColor: Colors.green,
                                       foregroundColor: white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
@@ -325,19 +330,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Transform.translate(
-          offset: const Offset(0, 10), 
-          child: FloatingActionButton(
-            backgroundColor: orange,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const DocumentScreen()),
-              );
-            },
-            child: const Icon(Icons.add, size: 40, color: white),
-          ),
+      floatingActionButton: Transform.translate(
+        offset: const Offset(0, 10),
+        child: FloatingActionButton(
+          backgroundColor: green,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DocumentScreen()),
+            );
+          },
+          child: const Icon(Icons.add, size: 40, color: white),
         ),
+      ),
       bottomNavigationBar: SafeArea(
         bottom: true,
         child: Container(
@@ -365,7 +370,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const DashboardScreen(),
+                        ),
                       );
                     },
                     child: const Center(
@@ -379,15 +386,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const ViewDocumentsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const ViewDocumentsScreen(),
+                        ),
                       );
                     },
                     child: const Center(
-                      child: Icon(Icons.description, color: midnightBlue, size: 24),
+                      child: Icon(
+                        Icons.description,
+                        color: midnightBlue,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 40), 
+                const SizedBox(width: 40),
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(32),
@@ -402,7 +415,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     borderRadius: BorderRadius.circular(32),
                     onTap: () {},
                     child: const Center(
-                      child: Icon(Icons.settings, color: midnightBlue, size: 24),
+                      child: Icon(
+                        Icons.settings,
+                        color: midnightBlue,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
