@@ -4,10 +4,12 @@ import 'package:devis_facture_gg_intervention/models/item_line.dart';
 import 'package:devis_facture_gg_intervention/screens/document_screen.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
 import 'package:devis_facture_gg_intervention/screens/pdf_preview_screen.dart';
+import 'package:devis_facture_gg_intervention/services/email_service.dart';
 import 'package:devis_facture_gg_intervention/services/pdf_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ViewDocumentsScreen extends StatelessWidget {
   const ViewDocumentsScreen({super.key});
@@ -364,8 +366,62 @@ class ViewDocumentsScreen extends StatelessWidget {
                               ),
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
-                              onPressed: () {
-                                // Implémenter l'envoi par mail ???
+                              onPressed: () async {
+                                final clientMap = data['client'] as Map<String, dynamic>? ?? {};
+                                final clientEmail = clientMap['email'] ?? '';
+                                final clientNom = clientMap['nom'] ?? 'Client';
+
+                                if (clientEmail.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Adresse mail du client introuvable')),
+                                  );
+                                  return;
+                                }
+
+                                // Récupère les infos pour générer le PDF
+                                final client = Client.fromMap(clientMap);
+                                final servicesList = (data['services'] as List<dynamic>? ?? [])
+                                    .map((e) => ItemLine.fromMap(e as Map<String, dynamic>))
+                                    .toList();
+                                final materielList = (data['materiel'] as List<dynamic>? ?? [])
+                                    .map((e) => ItemLine.fromMap(e as Map<String, dynamic>))
+                                    .toList();
+
+                                final Timestamp? timestamp = (data['createdAt'] as Timestamp?) ?? (data['date'] as Timestamp?);
+                                final devisDate = timestamp?.toDate() ?? DateTime.now();
+                                final devisId = data['devisId'] ?? '';
+                                final isSigned = data['isSigned'] ?? false;
+                                final signatureUrl = data['signatureUrl'] ?? '';
+                                final baseHt = (data['baseHt'] as num?)?.toDouble() ?? 0.0;
+                                final tvaMontant = (data['tva'] as num?)?.toDouble() ?? 0.0;
+
+                                // Génère le PDF du devis
+                                final pdfFile = await PdfService.generateDevisPdf(
+                                  client: client,
+                                  serviceItems: servicesList,
+                                  materielItems: materielList,
+                                  tvaMontant: tvaMontant,
+                                  devisDate: devisDate,
+                                  devisId: devisId,
+                                  isSigned: isSigned,
+                                  baseHt: baseHt,
+                                  signatureUrl: signatureUrl,
+                                );
+
+                                // Envoie le mail avec le PDF attaché
+                                await sendEmailWithPdf(
+                                  pdfFile: pdfFile,
+                                  clientEmail: clientEmail,
+                                  clientNom: clientNom,
+                                  devisId: devisId,
+                                  isSigned: isSigned,
+                                );
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Email envoyé à $clientEmail')),
+                                  );
+                                }
                               },
                               icon: const Icon(Icons.mail),
                               label: const Text('Envoyer par mail'),
