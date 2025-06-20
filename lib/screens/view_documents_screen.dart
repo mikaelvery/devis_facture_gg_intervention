@@ -32,7 +32,7 @@ class ViewDocumentsScreen extends StatelessWidget {
       floatingActionButton: Transform.translate(
         offset: const Offset(0, 10),
         child: FloatingActionButton(
-          backgroundColor: orange,
+          backgroundColor: green,
           onPressed: () {
             Navigator.push(
               context,
