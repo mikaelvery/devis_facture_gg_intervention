@@ -32,7 +32,7 @@ class ViewDocumentsScreen extends StatelessWidget {
       floatingActionButton: Transform.translate(
         offset: const Offset(0, 10),
         child: FloatingActionButton(
-            backgroundColor: orange,
+          backgroundColor: orange,
           onPressed: () {
             Navigator.push(
               context,
@@ -244,10 +244,7 @@ class ViewDocumentsScreen extends StatelessWidget {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: isSigned
-                                        ? green
-                                          
-                                        : orange,
+                                    color: isSigned ? green : orange,
                                     borderRadius: BorderRadius.circular(30),
                                   ),
                                   child: Row(
@@ -289,27 +286,36 @@ class ViewDocumentsScreen extends StatelessWidget {
                                         )
                                         .toList() ??
                                     [];
-                                final tvaPercent =
-                                    (data['tvaPercent'] as num?)?.toDouble() ??
-                                    0.0;
-                                final baseHt =
-                                    (data['baseHt'] as num?)?.toDouble() ?? 0.0;
+                                final materielList =
+                                    (data['materiel'] as List<dynamic>?)
+                                        ?.map(
+                                          (e) => ItemLine.fromMap(
+                                            e as Map<String, dynamic>,
+                                          ),
+                                        )
+                                        .toList() ??
+                                    [];
+                              
                                 final devisDate = date ?? DateTime.now();
                                 final devisId = data['devisId'] ?? '';
                                 final isSigned = data['isSigned'] ?? false;
                                 final signatureUrl = data['signatureUrl'] ?? '';
+                                final double baseHt = (data['baseHt'] as num?)?.toDouble() ?? 0.0;
+                                final double tvaMontant = (data['tva'] as num?)?.toDouble() ?? 0.0;
 
-                                final pdfFile =
-                                    await PdfService.generateDevisPdf(
-                                      client: client,
-                                      items: servicesList,
-                                      tvaPercent: tvaPercent,
-                                      devisDate: devisDate,
-                                      devisId: devisId,
-                                      baseHt: baseHt,
-                                      isSigned: isSigned,
-                                      signatureUrl: signatureUrl,
-                                    );
+                                // Passe bien tvaMontant tel quel, c’est la TVA en euros
+                                final pdfFile = await PdfService.generateDevisPdf(
+                                  client: client,
+                                  serviceItems: servicesList,
+                                  materielItems: materielList,
+                                  tvaMontant: tvaMontant,
+                                  devisDate: devisDate,
+                                  devisId: devisId,
+                                  isSigned: isSigned,
+                                  baseHt: baseHt,
+                                  signatureUrl: signatureUrl,
+                                );
+
 
                                 if (!context.mounted) return;
                                 final bytes = await pdfFile.readAsBytes();
@@ -441,9 +447,7 @@ class ViewDocumentsScreen extends StatelessWidget {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: isSigned
-                                ? green
-                                : orange,
+                            color: isSigned ? green : orange,
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Row(

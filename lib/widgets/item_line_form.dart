@@ -1,4 +1,5 @@
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/item_line.dart';
@@ -32,7 +33,7 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
   String? selectedType;
 
-  final List<double> tvaRates = [0, 10, 13];
+  final List<double> tvaRates = [0, 5.5, 8.5, 10, 13, 20];
   double selectedTva = 10;
 
   String selectedUnite = 'unité';
@@ -126,6 +127,15 @@ class _ItemLineFormState extends State<ItemLineForm> {
     }
   }
 
+  @override 
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Item: ${widget.item.description}, '
+          'Qty: ${widget.item.qty}, '
+          'PUHT: ${widget.item.puHt}, '
+          'Type: ${widget.item.type}, '
+          'TVA: $selectedTva';
+  }
+
   @override
   void dispose() {
     titreController.dispose();
@@ -145,8 +155,11 @@ class _ItemLineFormState extends State<ItemLineForm> {
       qty: qty,
       puHt: puHt,
       type: selectedType ?? 'materiel',
+      tva: selectedTva,
     );
-
+    if (kDebugMode) {
+      print("ItemLine mis à jour : $updatedItem");
+    }
     widget.onUpdate(updatedItem);
   }
 
@@ -217,72 +230,94 @@ class _ItemLineFormState extends State<ItemLineForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(cardTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+            Text(
+              cardTitle,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
             const SizedBox(height: 12),
 
+            // Champ titre, avec autocomplete pour service
             if (selectedType == 'service')
               Autocomplete<String>(
                 optionsBuilder: (textEditingValue) {
                   if (textEditingValue.text.isEmpty) return const Iterable<String>.empty();
-                  return serviceSuggestions.where((option) =>
-                    option.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                  return serviceSuggestions.where(
+                    (option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase()),
+                  );
                 },
                 onSelected: onServiceSelected,
                 fieldViewBuilder: (context, fieldTextEditingController, focusNode, onEditingComplete) {
                   fieldTextEditingController.text = titreController.text;
-                  fieldTextEditingController.selection = titreController.selection;
+                  fieldTextEditingController.addListener(() {
+                    titreController.text = fieldTextEditingController.text;
+                    titreController.selection = fieldTextEditingController.selection;
+                    updateItem();
+                  });
                   return TextField(
                     controller: fieldTextEditingController,
                     focusNode: focusNode,
                     decoration: customInputDecoration('Titre'),
-                    onChanged: (value) {
-                      titreController.text = value;
-                      updateItem();
-                    },
                     onEditingComplete: onEditingComplete,
                   );
-                },
+                }
               )
             else
-              buildTextField(controller: titreController, label: 'Titre', onChanged: (_) => updateItem()),
-
-            const SizedBox(height: 14),
-
-            if (selectedType == 'service' &&
-                servicesDetails.containsKey(titreController.text.trim()))
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      servicesDetails[titreController.text.trim()]!['description'],
-                      style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black54),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Text('Prix HT: ${puHtController.text} €', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(width: 24),
-                        const Text('TVA:', style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(width: 8),
-                        DropdownButton<double>(
-                          value: selectedTva,
-                          items: tvaRates
-                              .map((rate) => DropdownMenuItem(value: rate, child: Text('$rate %')))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) setState(() => selectedTva = value);
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              buildTextField(
+                controller: titreController,
+                label: 'Titre',
+                onChanged: (_) => updateItem(),
               ),
 
             const SizedBox(height: 14),
 
+            // Description & TVA si service connu
+            if (selectedType == 'service' &&
+            servicesDetails.containsKey(titreController.text.trim()))
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Text(
+                  servicesDetails[titreController.text.trim()]!['description'],
+                  style: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 10),
+
+            // TVA toujours affichée
+            Row(
+              children: [
+                Text(
+                  'TVA:',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(width: 8),
+                DropdownButton<double>(
+                  value: selectedTva,
+                  items: tvaRates
+                      .map((rate) => DropdownMenuItem(value: rate, child: Text('$rate %')))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedTva = value;
+                        updateItem();
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 14),
+
+            // Ligne Quantité, Unité, Prix Unitaire HT
             Row(
               children: [
                 Expanded(
@@ -297,7 +332,9 @@ class _ItemLineFormState extends State<ItemLineForm> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selectedUnite,
-                    items: uniteOptions.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+                    items: uniteOptions
+                        .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                        .toList(),
                     decoration: customInputDecoration('Unité'),
                     onChanged: (value) {
                       if (value != null) {
@@ -323,6 +360,7 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
             const SizedBox(height: 18),
 
+            // Bouton supprimer
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(

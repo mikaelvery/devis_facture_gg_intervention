@@ -5,6 +5,7 @@ import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart
 import 'package:devis_facture_gg_intervention/screens/signature_screen.dart';
 import 'package:devis_facture_gg_intervention/services/devis_service.dart';
 import 'package:devis_facture_gg_intervention/services/email_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle, Uint8List;
 import 'package:intl/intl.dart';
@@ -22,6 +23,7 @@ class DevisPreviewScreen extends StatefulWidget {
   final List<ItemLine> items;
   final double tvaPercent;
   final Uint8List? signatureBytes;
+  
 
   const DevisPreviewScreen({
     super.key,
@@ -48,16 +50,31 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   String? devisId; // stock le devisId généré ici
 
   // Calculs pour la facture
-  double get baseHt =>
-      widget.items.fold(0.0, (sum, item) => sum + item.totalHt);
-  double get montantTva => baseHt * (widget.tvaPercent / 100);
+  double get baseHt => widget.items.fold(0.0, (sum, item) => sum + item.totalHt);
+  double get montantTva {
+    return widget.items.fold(0.0, (sum, item) => sum + item.totalTva);
+  }
   double get totalTtc => baseHt + montantTva;
+  late double selectedTva;
 
   @override
   void initState() {
     super.initState();
+    selectedTva = widget.tvaPercent;
     signature = widget.signatureBytes; // Récupérer la signature si déjà fournie
     _initGeneratePdf(); // Générer le PDF dès le lancement de l'écran
+  }
+
+  // Par exemple, une fonction pour changer la TVA
+  void onTvaChanged(double newTva) async {
+    setState(() {
+      selectedTva = newTva;
+      isLoading = true;
+    });
+    await _generatePdf(); // Regénérer le PDF avec la nouvelle TVA
+    setState(() {
+      isLoading = false;
+    });
   }
 
   // Fonction pour générer un identifiant unique de devis
@@ -97,10 +114,10 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   Future<void> _generatePdf() async {
     final pdf = pw.Document();
 
-    // Générer et stocker le devisId dans la variable d'instance
+    // Génére et stocker le devisId dans la variable d'instance
     devisId = generateDevisId();
 
-    // Charger les polices et logo depuis les assets
+    // Charge les polices et logo depuis les assets
     final font = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
     );
@@ -117,35 +134,35 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         theme: pw.ThemeData.withFont(base: font, bold: fontBold),
         build: (context) => [
           pw.Row(
-  crossAxisAlignment: pw.CrossAxisAlignment.start,
-  children: [
-    pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Image(logoImage, width: 70),
-        pw.SizedBox(height: 10),
-        pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
-        pw.Text('30 rue général de gaulle'),
-        pw.Text('57050 Longeville-Lès-Metz, France'),
-        pw.Text('gg.intervention@gmail.com'),
-        pw.Text('+33 6 45 19 06 94'),
-      ],
-    ),
-    pw.Spacer(),
-    pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.SizedBox(height: 53),  // <-- décale tout le contenu client vers le bas
-        pw.Text('Client :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-        pw.Text('${widget.client.prenom} ${widget.client.nom}'),
-        pw.Text(widget.client.adresse),
-        pw.Text(widget.client.email),
-        pw.Text(widget.client.telephone),
-        pw.Text('$devisId'),
-      ],
-    ),
-  ],
-),
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Image(logoImage, width: 70),
+                  pw.SizedBox(height: 10),
+                  pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
+                  pw.Text('30 rue général de gaulle'),
+                  pw.Text('57050 Longeville-Lès-Metz, France'),
+                  pw.Text('gg.intervention@gmail.com'),
+                  pw.Text('+33 6 45 19 06 94'),
+                ],
+              ),
+              pw.Spacer(),
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.SizedBox(height: 53),
+                  pw.Text('Client :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text('${widget.client.prenom} ${widget.client.nom}'),
+                  pw.Text(widget.client.adresse),
+                  pw.Text(widget.client.email),
+                  pw.Text(widget.client.telephone),
+                  pw.Text('$devisId'),
+                ],
+              ),
+            ],
+          ),
 
           pw.SizedBox(height: 30),
           pw.Center(
@@ -163,7 +180,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
           ),
           pw.SizedBox(height: 6),
           pw.TableHelper.fromTextArray(
-            headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
+            headers: ['Description', 'Quantité', 'PU HT', 'Total HT', 'TVA'],
             data: widget.items
                 .where((item) => item.type == 'service')
                 .map(
@@ -172,6 +189,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                     item.qty.toString(),
                     '${item.puHt.toStringAsFixed(2)} €',
                     '${item.totalHt.toStringAsFixed(2)} €',
+                    '${item.tva.toStringAsFixed(0)} %',
                   ],
                 )
                 .toList(),
@@ -189,12 +207,14 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               1: const pw.FlexColumnWidth(1),
               2: const pw.FlexColumnWidth(1),
               3: const pw.FlexColumnWidth(1),
+              4: const pw.FlexColumnWidth(1),
             },
             cellAlignments: {
               0: pw.Alignment.topLeft,
               1: pw.Alignment.center,
               2: pw.Alignment.center,
               3: pw.Alignment.center,
+              4: pw.Alignment.center,
             },
           ),
 
@@ -206,7 +226,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
           ),
           pw.SizedBox(height: 6),
           pw.TableHelper.fromTextArray(
-            headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
+            headers: ['Description', 'Quantité', 'PU HT', 'Total HT', 'TVA'],
             data: widget.items
                 .where((item) => item.type == 'materiel')
                 .map(
@@ -215,6 +235,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                     item.qty.toString(),
                     '${item.puHt.toStringAsFixed(2)} €',
                     '${item.totalHt.toStringAsFixed(2)} €',
+                    '${item.tva.toStringAsFixed(0)} %',
                   ],
                 )
                 .toList(),
@@ -232,14 +253,17 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               1: const pw.FlexColumnWidth(1),
               2: const pw.FlexColumnWidth(1),
               3: const pw.FlexColumnWidth(1),
+              4: const pw.FlexColumnWidth(1),
             },
             cellAlignments: {
               0: pw.Alignment.topLeft,
               1: pw.Alignment.center,
               2: pw.Alignment.center,
               3: pw.Alignment.center,
+              4: pw.Alignment.center,
             },
           ),
+
 
           pw.SizedBox(height: 20),
           pw.Container(
@@ -248,13 +272,13 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Text(
-                  'Base HT : ${NumberFormat.decimalPattern('fr_FR').format(baseHt)} €',
+                  'Total HT : ${NumberFormat.decimalPattern('fr_FR').format(baseHt)} €',
                 ),
                 pw.Text(
-                  'TVA (${widget.tvaPercent.toStringAsFixed(2)}%) : ${NumberFormat.decimalPattern('fr_FR').format(montantTva)} €',
+                  'Total TVA : ${NumberFormat.currency(locale: 'fr_FR', symbol: '€').format(montantTva)}',
                 ),
                 pw.Text(
-                  'Total TTC : ${NumberFormat.decimalPattern('fr_FR').format(totalTtc)} €',
+                  'Total TTC : ${totalTtc.toStringAsFixed(2)} €',
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     fontSize: 14,
@@ -296,6 +320,9 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     );
 
     await file.writeAsBytes(await pdf.save());
+    if (kDebugMode) {
+      print('Calcul TVA avec selectedTva = $selectedTva');
+    }
 
     setState(() {
       pdfFile = file;
@@ -328,14 +355,14 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         date: widget.devisDate,
         services: widget.items.where((i) => i.type == 'service').toList(),
         materiel: widget.items.where((i) => i.type == 'materiel').toList(),
-        baseHt: baseHt,
-        tva: montantTva,
-        totalTtc: totalTtc,
+        baseHt: double.parse(baseHt.toStringAsFixed(2)),
+        tva: double.parse(montantTva.toStringAsFixed(2)),
+        totalTtc: double.parse(totalTtc.toStringAsFixed(2)),
         isSigned: isSigned,
         signedAt: signedAt,
         signatureUrl: signature != null
-            ? 'data:image/png;base64,${base64Encode(signature!)}'
-            : null,
+          ? 'data:image/png;base64,${base64Encode(signature!)}'
+          : null,
       );
 
       if (!mounted) return;
@@ -447,3 +474,5 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     );
   }
 }
+
+// Gaz traceur (hélium, gaz fumigène)

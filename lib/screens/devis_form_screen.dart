@@ -29,13 +29,12 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
   final _clientPaysController = TextEditingController();
 
   List<ItemLine> items = [
-    ItemLine(description: '', qty: 1, puHt: 0, type: 'service'),
+    ItemLine(description: '', qty: 1, puHt: 0, tva: 10, type: 'service'),
   ];
-
-  double tvaPercent = 10.0;
-
+  double selectedTva = 10.0;
   double get baseHt => items.fold(0.0, (sum, item) => sum + item.totalHt);
-  double get montantTva => baseHt * (tvaPercent / 100);
+  double get montantTva =>
+      items.fold(0.0, (sum, item) => sum + item.totalHt * (item.tva / 100));
   double get totalTtc => baseHt + montantTva;
 
   // Mise à jour des champs client à partir d’un Client sélectionné
@@ -77,7 +76,9 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
 
   void _addItem(String type) {
     setState(() {
-      items.add(ItemLine(description: '', qty: 1, puHt: 0, type: type));
+      items.add(
+        ItemLine(description: '', qty: 1, puHt: 0, tva: 10, type: type),
+      );
     });
   }
 
@@ -139,34 +140,36 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
   }
 
   Widget _buildTextField(
-  TextEditingController controller,
-  String label, {
-  TextInputType keyboardType = TextInputType.text,
-}) {
-  return TextField(
-    controller: controller,
-    keyboardType: keyboardType,
-    style: const TextStyle(color: Colors.white),
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.white70),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white.withAlpha(100)),
-        borderRadius: BorderRadius.circular(8),
+    TextEditingController controller,
+    String label, {
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white.withAlpha(100)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        // Enlever filled et fillColor
+        // filled: true,
+        // fillColor: Colors.white.withAlpha(25),
+        isDense: true, // optionnel, pour un champ plus compact
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.white),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      // Enlever filled et fillColor
-      // filled: true,
-      // fillColor: Colors.white.withAlpha(25),
-      isDense: true, // optionnel, pour un champ plus compact
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildSummaryRow(String label, double amount, {bool isBold = false}) {
     return Padding(
@@ -237,7 +240,8 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),child: ConstrainedBox(
+        padding: const EdgeInsets.all(20),
+        child: ConstrainedBox(
           constraints: BoxConstraints(
             minWidth: MediaQuery.of(context).size.width - 40,
           ),
@@ -274,7 +278,9 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                       child: _buildTextField(_clientPrenomController, 'Prénom'),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildTextField(_clientNomController, 'Nom')),
+                    Expanded(
+                      child: _buildTextField(_clientNomController, 'Nom'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -342,51 +348,23 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
               _buildItemList('Matériels', 'materiel'),
 
               const SizedBox(height: 16),
-              const Text(
-                "TVA %",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
+
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: DropdownButton<double>(
-                  value: tvaPercent,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items: [0, 5.5, 10, 20].map((e) {
-                    return DropdownMenuItem(
-                      value: e.toDouble(),
-                      child: Text(
-                        e.toString(),
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        tvaPercent = value;
-                      });
-                    }
-                  },
-                ),
               ),
 
               const Divider(height: 32, thickness: 2, color: Colors.white),
 
-              _buildSummaryRow('Montant HT', baseHt),
+              _buildSummaryRow('Total HT', baseHt),
               _buildSummaryRow(
-                'TVA (${tvaPercent.toStringAsFixed(1)}%)',
+                'Total TVA',
                 montantTva,
               ),
-              _buildSummaryRow('Montant TTC', totalTtc, isBold: true),
+              _buildSummaryRow('Total TTC', totalTtc, isBold: true),
 
               const SizedBox(height: 24),
               Center(
@@ -426,7 +404,7 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
                           builder: (context) => DevisPreviewScreen(
                             client: client,
                             items: items,
-                            tvaPercent: tvaPercent,
+                            tvaPercent: selectedTva,
                             devisDate: devisDate,
                           ),
                         ),

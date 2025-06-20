@@ -8,7 +8,7 @@ class DevisModel {
   List<ItemLine> items;
 
   double get total =>
-      items.fold(0, (sum, item) => sum + (item.puHt * item.qty));
+    items.fold(0, (acc, item) => acc + (item.puHt * item.qty));
 
   DevisModel({
     required this.id,
