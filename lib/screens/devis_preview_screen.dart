@@ -474,5 +474,3 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
     );
   }
 }
-
-// Gaz traceur (hélium, gaz fumigène)

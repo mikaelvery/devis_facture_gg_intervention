@@ -13,7 +13,7 @@ import '../models/item_line.dart';
 class PdfService {
   static Future<File> generateDevisPdf({
     required Client client,
-    required double tvaMontant,   
+    required double tvaMontant,
     required DateTime devisDate,
     required String devisId,
     required double baseHt,
@@ -24,17 +24,22 @@ class PdfService {
   }) async {
     final pdf = pw.Document();
 
-    final font = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Regular.ttf'));
-    final fontBold = pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Bold.ttf'));
+    final font = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
+    );
+    final fontBold = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
+    );
 
     final logoData = await rootBundle.load('assets/images/logo-gg.png');
     final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
 
-    final tvaPercent = baseHt > 0 ? (tvaMontant / baseHt) * 100 : 0;
     final totalTtc = baseHt + tvaMontant;
 
     Uint8List? signatureBytes;
-    if (isSigned && signatureUrl != null && signatureUrl.startsWith("data:image")) {
+    if (isSigned &&
+        signatureUrl != null &&
+        signatureUrl.startsWith("data:image")) {
       final base64Data = signatureUrl.split(',').last;
       signatureBytes = base64Decode(base64Data);
     }
@@ -55,7 +60,10 @@ class PdfService {
                 children: [
                   pw.Image(logoImage, width: 70),
                   pw.SizedBox(height: 10),
-                  pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
+                  pw.Text(
+                    'GG Intervention',
+                    style: pw.TextStyle(font: fontBold),
+                  ),
                   pw.Text('30 rue général de gaulle'),
                   pw.Text('57050 Longeville-Lès-Metz, France'),
                   pw.Text('gg.intervention@gmail.com'),
@@ -67,7 +75,10 @@ class PdfService {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.SizedBox(height: 53),
-                  pw.Text('Client :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    'Client :',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
                   pw.Text('${client.prenom} ${client.nom}'),
                   pw.Text(client.adresse),
                   pw.Text(client.email),
@@ -89,18 +100,31 @@ class PdfService {
 
           // SERVICES
           if (services.isNotEmpty) ...[
-            pw.Text('Services', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+            pw.Text(
+              'Services',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16),
+            ),
             pw.SizedBox(height: 6),
             pw.TableHelper.fromTextArray(
-              headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
-              data: services.map((item) => [
-                item.description,
-                item.qty.toString(),
-                '${item.puHt.toStringAsFixed(2)} €',
-                '${item.totalHt.toStringAsFixed(2)} €',
-              ]).toList(),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.black),
-              headerDecoration: pw.BoxDecoration(color: PdfColor.fromInt(0xC0D4A017)),
+              headers: ['Description', 'Quantité', 'PU HT', 'Total HT', 'TVA'],
+              data: services
+                  .map(
+                    (item) => [
+                      item.description,
+                      item.qty.toString(),
+                      '${item.puHt.toStringAsFixed(2)} €',
+                      '${item.totalHt.toStringAsFixed(2)} €',
+                      '${item.tva.toStringAsFixed(0)} %',
+                    ],
+                  )
+                  .toList(),
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.black,
+              ),
+              headerDecoration: pw.BoxDecoration(
+                color: PdfColor.fromInt(0xC0D4A017),
+              ),
               cellAlignment: pw.Alignment.centerLeft,
               cellHeight: 20,
               columnWidths: {
@@ -108,12 +132,14 @@ class PdfService {
                 1: const pw.FlexColumnWidth(1),
                 2: const pw.FlexColumnWidth(1),
                 3: const pw.FlexColumnWidth(1),
+                4: const pw.FlexColumnWidth(1),
               },
               cellAlignments: {
                 0: pw.Alignment.topLeft,
                 1: pw.Alignment.center,
                 2: pw.Alignment.center,
                 3: pw.Alignment.center,
+                4: pw.Alignment.center,
               },
             ),
             pw.SizedBox(height: 10),
@@ -121,18 +147,32 @@ class PdfService {
 
           // MATERIEL
           if (materiel.isNotEmpty) ...[
-            pw.Text('Matériel', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
+            pw.Text(
+              'Matériel',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16),
+            ),
             pw.SizedBox(height: 6),
             pw.TableHelper.fromTextArray(
-              headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
-              data: materiel.map((item) => [
-                item.description,
-                item.qty.toString(),
-                '${item.puHt.toStringAsFixed(2)} €',
-                '${item.totalHt.toStringAsFixed(2)} €',
-              ]).toList(),
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.black),
-              headerDecoration: pw.BoxDecoration(color: PdfColor.fromInt(0xC0D4A017)),
+              headers: ['Description', 'Quantité', 'PU HT', 'Total HT', 'TVA'],
+              data: materiel
+                  .map(
+                    (item) => [
+                      item.description,
+                      item.qty.toString(),
+                      '${item.puHt.toStringAsFixed(2)} €',
+                      '${item.totalHt.toStringAsFixed(2)} €',
+                      '${item.tva.toStringAsFixed(0)} %',
+                      '${item.tva.toStringAsFixed(0)} %',
+                    ],
+                  )
+                  .toList(),
+              headerStyle: pw.TextStyle(
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.black,
+              ),
+              headerDecoration: pw.BoxDecoration(
+                color: PdfColor.fromInt(0xC0D4A017),
+              ),
               cellAlignment: pw.Alignment.centerLeft,
               cellHeight: 20,
               columnWidths: {
@@ -140,12 +180,15 @@ class PdfService {
                 1: const pw.FlexColumnWidth(1),
                 2: const pw.FlexColumnWidth(1),
                 3: const pw.FlexColumnWidth(1),
+                4: const pw.FlexColumnWidth(1),
               },
               cellAlignments: {
                 0: pw.Alignment.topLeft,
                 1: pw.Alignment.center,
                 2: pw.Alignment.center,
                 3: pw.Alignment.center,
+                4: pw.Alignment.center,
+
               },
             ),
             pw.SizedBox(height: 20),
@@ -157,11 +200,18 @@ class PdfService {
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text('Total HT : ${NumberFormat.decimalPattern('fr_FR').format(baseHt)} €'),
-                pw.Text('Total TVA : ${NumberFormat.decimalPattern('fr_FR').format(tvaMontant)} €'),
+                pw.Text(
+                  'Total HT : ${NumberFormat.decimalPattern('fr_FR').format(baseHt)} €',
+                ),
+                pw.Text(
+                  'Total TVA : ${NumberFormat.decimalPattern('fr_FR').format(tvaMontant)} €',
+                ),
                 pw.Text(
                   'Total TTC : ${NumberFormat.decimalPattern('fr_FR').format(totalTtc)} €',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
