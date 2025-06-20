@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:devis_facture_gg_intervention/models/devis_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:devis_facture_gg_intervention/models/facture.dart';
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
 
 class DevisToFactureScreen extends StatefulWidget {
@@ -138,7 +136,6 @@ class _DevisToFactureScreenState extends State<DevisToFactureScreen> {
 
                       return GestureDetector(
                         onTap: () {
-                          final devis = DevisModel.fromDocument(doc);
                           // Action
                         },
                         child: Card(

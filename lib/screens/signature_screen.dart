@@ -74,7 +74,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
                       icon: const Icon(Icons.check),
                       label: const Text("Valider"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
+                        backgroundColor: green,
                         foregroundColor: Colors.white,
                       ),
                     ),

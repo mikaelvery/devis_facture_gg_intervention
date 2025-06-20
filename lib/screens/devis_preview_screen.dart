@@ -2,22 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:devis_facture_gg_intervention/constants/colors.dart';
 import 'package:devis_facture_gg_intervention/screens/home_dashboard_screen.dart';
-import 'package:devis_facture_gg_intervention/screens/signature_screen.dart'; 
-import 'package:devis_facture_gg_intervention/services/devis_service.dart'; 
-import 'package:devis_facture_gg_intervention/services/email_service.dart'; 
+import 'package:devis_facture_gg_intervention/screens/signature_screen.dart';
+import 'package:devis_facture_gg_intervention/services/devis_service.dart';
+import 'package:devis_facture_gg_intervention/services/email_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'
-    show
-        rootBundle,
-        Uint8List; 
+import 'package:flutter/services.dart' show rootBundle, Uint8List;
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart'; 
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart'
-    as pw; 
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart'; 
-import '../models/client.dart'; 
-import '../models/item_line.dart'; 
+import 'package:pdf/widgets.dart' as pw;
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import '../models/client.dart';
+import '../models/item_line.dart';
 import '../services/client_service.dart';
 
 class DevisPreviewScreen extends StatefulWidget {
@@ -68,7 +64,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
   String generateDevisId() {
     final now = DateTime.now();
     final datePart =
-      '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final suffix = now.millisecondsSinceEpoch.toString().substring(
       now.millisecondsSinceEpoch.toString().length - 5,
     );
@@ -121,40 +117,36 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
         theme: pw.ThemeData.withFont(base: font, bold: fontBold),
         build: (context) => [
           pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Image(logoImage, width: 80),
-                  pw.SizedBox(height: 8),
-                  pw.Text(
-                    'GG Intervention',
-                    style: pw.TextStyle(font: fontBold),
-                  ),
-                  pw.Text('30 rue général de gaulle'),
-                  pw.Text('57050 Longeville-Lès-Metz, France'),
-                  pw.Text('gg.intervention@gmail.com'),
-                  pw.Text('+33 6 45 19 06 94'),
-                ],
-              ),
-              pw.Spacer(),
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    'Client :',
-                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                  ),
-                  pw.Text('${widget.client.prenom} ${widget.client.nom}'),
-                  pw.Text(widget.client.adresse),
-                  pw.Text(widget.client.email),
-                  pw.Text(widget.client.telephone),
-                  pw.Text('Numéro du devis : $devisId'),
-                ],
-              ),
-            ],
-          ),
+  crossAxisAlignment: pw.CrossAxisAlignment.start,
+  children: [
+    pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Image(logoImage, width: 70),
+        pw.SizedBox(height: 10),
+        pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
+        pw.Text('30 rue général de gaulle'),
+        pw.Text('57050 Longeville-Lès-Metz, France'),
+        pw.Text('gg.intervention@gmail.com'),
+        pw.Text('+33 6 45 19 06 94'),
+      ],
+    ),
+    pw.Spacer(),
+    pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.SizedBox(height: 53),  // <-- décale tout le contenu client vers le bas
+        pw.Text('Client :', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+        pw.Text('${widget.client.prenom} ${widget.client.nom}'),
+        pw.Text(widget.client.adresse),
+        pw.Text(widget.client.email),
+        pw.Text(widget.client.telephone),
+        pw.Text('$devisId'),
+      ],
+    ),
+  ],
+),
+
           pw.SizedBox(height: 30),
           pw.Center(
             child: pw.Text(
@@ -163,9 +155,17 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
             ),
           ),
           pw.SizedBox(height: 20),
+          // tableau pour services
+          // Titre Services encadré
+          pw.Text(
+            'Services',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16),
+          ),
+          pw.SizedBox(height: 6),
           pw.TableHelper.fromTextArray(
             headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
             data: widget.items
+                .where((item) => item.type == 'service')
                 .map(
                   (item) => [
                     item.description,
@@ -175,7 +175,72 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                   ],
                 )
                 .toList(),
+            headerStyle: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.black,
+            ),
+            headerDecoration: pw.BoxDecoration(
+              color: PdfColor.fromInt(0xC0D4A017),
+            ),
+            cellAlignment: pw.Alignment.centerLeft,
+            cellHeight: 20,
+            columnWidths: {
+              0: const pw.FlexColumnWidth(3),
+              1: const pw.FlexColumnWidth(1),
+              2: const pw.FlexColumnWidth(1),
+              3: const pw.FlexColumnWidth(1),
+            },
+            cellAlignments: {
+              0: pw.Alignment.topLeft,
+              1: pw.Alignment.center,
+              2: pw.Alignment.center,
+              3: pw.Alignment.center,
+            },
           ),
+
+          pw.SizedBox(height: 10),
+
+          pw.Text(
+            'Matériel',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16),
+          ),
+          pw.SizedBox(height: 6),
+          pw.TableHelper.fromTextArray(
+            headers: ['Description', 'Quantité', 'PU HT', 'Total HT'],
+            data: widget.items
+                .where((item) => item.type == 'materiel')
+                .map(
+                  (item) => [
+                    item.description,
+                    item.qty.toString(),
+                    '${item.puHt.toStringAsFixed(2)} €',
+                    '${item.totalHt.toStringAsFixed(2)} €',
+                  ],
+                )
+                .toList(),
+            headerStyle: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.black,
+            ),
+            headerDecoration: pw.BoxDecoration(
+              color: PdfColor.fromInt(0xC0D4A017),
+            ),
+            cellAlignment: pw.Alignment.centerLeft,
+            cellHeight: 20,
+            columnWidths: {
+              0: const pw.FlexColumnWidth(3),
+              1: const pw.FlexColumnWidth(1),
+              2: const pw.FlexColumnWidth(1),
+              3: const pw.FlexColumnWidth(1),
+            },
+            cellAlignments: {
+              0: pw.Alignment.topLeft,
+              1: pw.Alignment.center,
+              2: pw.Alignment.center,
+              3: pw.Alignment.center,
+            },
+          ),
+
           pw.SizedBox(height: 20),
           pw.Container(
             alignment: pw.Alignment.centerRight,
@@ -348,7 +413,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
               icon: const Icon(Icons.edit),
               label: const Text('Signer ce devis'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: green,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

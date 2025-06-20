@@ -302,7 +302,7 @@ class ViewDocumentsScreen extends StatelessWidget {
                                 final pdfFile =
                                     await PdfService.generateDevisPdf(
                                       client: client,
-                                      services: servicesList,
+                                      items: servicesList,
                                       tvaPercent: tvaPercent,
                                       devisDate: devisDate,
                                       devisId: devisId,
