@@ -286,10 +286,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       // supprime les données de session token
                                       await _logoutUser();
 
-                                      Navigator.of(
-                                        // ignore: use_build_context_synchronously
-                                        context,
-                                      ).pushNamedAndRemoveUntil(
+                                      if (!context.mounted) return;
+
+                                      Navigator.of(context).pushNamedAndRemoveUntil(
                                         '/screens/splashScreen',
                                         (Route<dynamic> route) => false,
                                       );

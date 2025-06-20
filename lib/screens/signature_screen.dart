@@ -44,10 +44,11 @@ class _SignatureScreenState extends State<SignatureScreen> {
   Future<void> _saveSignature() async {
     if (_controller.isNotEmpty) {
       final Uint8List? data = await _controller.toPngBytes();
-      // ignore: use_build_context_synchronously
+      if (!context.mounted) return; 
       Navigator.of(context).pop(data);
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

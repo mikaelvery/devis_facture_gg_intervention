@@ -73,12 +73,12 @@ class NotificationCard extends StatelessWidget {
             onPressed: () async {
               try {
                 await doc.reference.update({'isRead': true});
-                // ignore: use_build_context_synchronously
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Notification marquée comme lue')),
                 );
               } catch (e) {
-                // ignore: use_build_context_synchronously
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Erreur : $e')),
                 );

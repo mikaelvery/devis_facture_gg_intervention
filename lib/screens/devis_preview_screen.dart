@@ -373,12 +373,14 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
 
       await Future.delayed(const Duration(milliseconds: 500));
 
+      if (!context.mounted) return;
+
       Navigator.pushAndRemoveUntil(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
         (Route<dynamic> route) => false,
       );
+
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -431,7 +433,8 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                     isLoading = false;
                   });
 
-                  // ignore: use_build_context_synchronously
+                  if (!context.mounted) return;
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Signature enregistrée.")),
                   );

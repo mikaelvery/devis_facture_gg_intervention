@@ -320,17 +320,18 @@ class ViewDocumentsScreen extends StatelessWidget {
 
                                 if (!context.mounted) return;
                                 final bytes = await pdfFile.readAsBytes();
-
-                                // ignore: use_build_context_synchronously
+                                if (!context.mounted) return;
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        PdfPreviewScreen(bytes: bytes),
+                                    builder: (_) => PdfPreviewScreen(bytes: bytes),
                                   ),
                                 );
                               },
 
-                              icon: const Icon(Icons.picture_as_pdf),
+                              icon: SizedBox(
+                                width: 24,
+                                child: const Icon(Icons.picture_as_pdf),
+                              ),
                               label: const Text('Aperçu du devis'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: midnightBlue,
@@ -342,27 +343,75 @@ class ViewDocumentsScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 6),
-                            if (!isSigned)
-                              ElevatedButton.icon(
-                                onPressed: () async {
-                                  await FirebaseFirestore.instance
-                                      .collection('devis')
-                                      .doc(doc.id)
-                                      .update({'isSigned': true});
-                                  // ignore: use_build_context_synchronously
-                                  Navigator.of(context).pop();
-                                },
-                                icon: const Icon(Icons.check),
-                                label: const Text('Marquer comme signé'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: midnightBlue,
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size(double.infinity, 50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    backgroundColor: midnightBlue,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    title: Row(
+                                      children: const [
+                                        SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            'Confirmer la suppression',
+                                            style: TextStyle(color: Colors.white),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    content: const Text(
+                                      'Êtes-vous sûr de vouloir supprimer ce devis ?',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        ),
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text('Annuler'),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: orange,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                        ),
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                          child: const Text(
+                                            'Supprimer',
+                                            style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                );
+
+                                if (confirmed == true) {
+                                  await FirebaseFirestore.instance.collection('devis').doc(doc.id).delete();
+                                  if (!context.mounted) return; 
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Devis supprimé')),
+                                  );
+                                }
+                              },
+                              icon: SizedBox(width: 24, child: const Icon(Icons.delete)),
+                              label: const Text('Supprimer le devis'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: midnightBlue,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
+                            ),
+
+
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: () async {
@@ -422,7 +471,10 @@ class ViewDocumentsScreen extends StatelessWidget {
                                   );
                                 }
                               },
-                              icon: const Icon(Icons.mail),
+                               icon: SizedBox(
+                                width: 24,
+                                child: const Icon(Icons.mail),
+                              ),
                               label: const Text('Envoyer par mail'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: midnightBlue,
