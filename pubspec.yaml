@@ -30,25 +30,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cloud_firestore: ^5.6.8
-  firebase_core: ^3.13.1
-  firebase_analytics: ^11.4.6
+  cloud_firestore: ^6.0.2
+  firebase_core: ^4.1.1
+  firebase_analytics: ^12.0.2
   signature: ^6.0.0
   pdf: ^3.11.3
   printing: ^5.14.2
-  syncfusion_flutter_pdfviewer: ^29.2.7
+  syncfusion_flutter_pdfviewer: ^31.1.21
   path_provider: ^2.1.5
   url_launcher: ^6.3.1
   intl: ^0.20.2
   mailer: ^6.4.1
-  flutter_dotenv: ^5.2.1
+  flutter_dotenv: ^6.0.0
   google_fonts: ^6.2.1
-  flutter_login: ^5.0.0
-  firebase_auth: ^5.5.4
+  flutter_login: ^6.0.0
+  firebase_auth: ^6.1.0
   shared_preferences: ^2.5.3
   flutter_launcher_icons: ^0.14.3
-  firebase_messaging: ^15.2.6
+  firebase_messaging: ^16.0.2
   flutter_local_notifications: ^19.2.1
+  diacritic: ^0.1.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

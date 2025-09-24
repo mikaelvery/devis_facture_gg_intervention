@@ -19,12 +19,12 @@ Future<void> sendEmailWithPdf({
   final pass = dotenv.env['EMAIL_PASS']!;
   final smtpServer = gmail(user, pass);
 
-  final subject = 'Votre devis GG Intervention';
+  final subject = 'Votre devis G&G Intervention';
   final lienSignature =
-      'https://chary-depannage-website.vercel.app/signature?numero=${Uri.encodeComponent(devisId)}';
+      'https://www.ggintervention.fr/signature?numero=${Uri.encodeComponent(devisId)}';
 
   final message = Message()
-    ..from = Address(user, 'GG Intervention')
+    ..from = Address(user, 'G&G Intervention')
     ..recipients.add(clientEmail)
     ..subject = subject;
 
@@ -40,7 +40,7 @@ Merci de bien vouloir le signer à l’aide du lien suivant :
 $lienSignature
 
 Cordialement,  
-GG Dépannage
+G&G Intervention
       '''
       ..html =
           '''
@@ -48,7 +48,7 @@ GG Dépannage
 <p>Veuillez trouver ci-joint votre devis <strong>n°$devisId</strong>.</p>
 <p>Merci de bien vouloir le signer à l’aide du lien suivant :</p>
 <p><a href="$lienSignature">$lienSignature</a></p>
-<p>Cordialement,<br>GG Intervention</p>
+<p>Cordialement,<br>G&G Intervention</p>
       '''
       ..attachments = [
         FileAttachment(pdfFile)
@@ -64,13 +64,13 @@ Bonjour $clientNom,
 Voici votre devis n°$devisId signé, en pièce jointe.
 
 Merci pour votre confiance.  
-GG Dépannage
+G&G Intervention
       '''
       ..html =
           '''
 <p>Bonjour $clientNom,</p>
 <p>Voici votre devis <strong>n°$devisId</strong> signé, en pièce jointe.</p>
-<p>Merci pour votre confiance.<br>GG Dépannage</p>
+<p>Merci pour votre confiance.<br>G&G Intervention</p>
       '''
       ..attachments = [
         FileAttachment(pdfFile)

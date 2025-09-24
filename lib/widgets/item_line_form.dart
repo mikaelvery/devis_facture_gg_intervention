@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/item_line.dart';
+import 'package:diacritic/diacritic.dart';
 
 class ItemLineForm extends StatefulWidget {
   final ItemLine item;
@@ -41,7 +42,7 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
   final Map<String, Map<String, dynamic>> servicesDetails = {
     'Déplacement': {
-      'description': 'Déplacement dans un secteur de 30 KM',
+      'description': 'Déplacement dans un secteur de 50 KM',
       'prix': 40.0,
     },
     "Main d'oeuvre": {
@@ -127,13 +128,13 @@ class _ItemLineFormState extends State<ItemLineForm> {
     }
   }
 
-  @override 
+  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'Item: ${widget.item.description}, '
-          'Qty: ${widget.item.qty}, '
-          'PUHT: ${widget.item.puHt}, '
-          'Type: ${widget.item.type}, '
-          'TVA: $selectedTva';
+        'Qty: ${widget.item.qty}, '
+        'PUHT: ${widget.item.puHt}, '
+        'Type: ${widget.item.type}, '
+        'TVA: $selectedTva';
   }
 
   @override
@@ -178,24 +179,29 @@ class _ItemLineFormState extends State<ItemLineForm> {
       updateItem();
     });
   }
-  
-  InputDecoration customInputDecoration(String label) => InputDecoration(
-    labelText: label,
-    labelStyle: TextStyle(color: midnightBlue),
-    floatingLabelStyle: TextStyle(color: midnightBlue),
-    filled: true,
-    fillColor: Colors.white,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: midnightBlue),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: midnightBlue, width: 2),
-    ),
-  );
+
+  InputDecoration customInputDecoration(String label, {Color? color}) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: Colors.grey[100],
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: green, width: 2),
+      ),
+      labelStyle: TextStyle(color: color ?? Colors.grey),
+    );
+  }
 
   Widget buildTextField({
     required TextEditingController controller,
@@ -204,14 +210,18 @@ class _ItemLineFormState extends State<ItemLineForm> {
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
     void Function(String)? onChanged,
+    Color? cursorColor,
+    Color? color,
   }) {
     return TextField(
       controller: controller,
       focusNode: focusNode,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
-      decoration: customInputDecoration(label),
+      decoration: customInputDecoration(label, color: color),
       onChanged: onChanged,
+      cursorColor: green,
+
     );
   }
 
@@ -221,10 +231,11 @@ class _ItemLineFormState extends State<ItemLineForm> {
     final cardTitle = '$prefix ${widget.index + 1}';
 
     return Card(
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-      elevation: 6,
+      elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      shadowColor: Colors.black26,
+      shadowColor: Colors.grey.withValues(alpha: 0.2),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -243,27 +254,54 @@ class _ItemLineFormState extends State<ItemLineForm> {
             // Champ titre, avec autocomplete pour service
             if (selectedType == 'service')
               Autocomplete<String>(
-                optionsBuilder: (textEditingValue) {
+                optionsBuilder: (TextEditingValue textEditingValue) {
                   if (textEditingValue.text.isEmpty) return const Iterable<String>.empty();
-                  return serviceSuggestions.where(
-                    (option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase()),
-                  );
+
+                  final query = removeDiacritics(textEditingValue.text.toLowerCase());
+
+                  final startsWith = serviceSuggestions.where((option) {
+                    final normalized = removeDiacritics(option.toLowerCase());
+                    return normalized.startsWith(query);
+                  }).toList();
+
+                  final contains = serviceSuggestions.where((option) {
+                    final normalized = removeDiacritics(option.toLowerCase());
+                    return !normalized.startsWith(query) && normalized.contains(query);
+                  }).toList();
+
+                  return [...startsWith, ...contains];
                 },
                 onSelected: onServiceSelected,
-                fieldViewBuilder: (context, fieldTextEditingController, focusNode, onEditingComplete) {
-                  fieldTextEditingController.text = titreController.text;
-                  fieldTextEditingController.addListener(() {
-                    titreController.text = fieldTextEditingController.text;
-                    titreController.selection = fieldTextEditingController.selection;
-                    updateItem();
-                  });
+                fieldViewBuilder: (context, textController, focusNode, onEditingComplete) {
+                  // ici on utilise textController fourni par Autocomplete
                   return TextField(
-                    controller: fieldTextEditingController,
+                    controller: textController,
                     focusNode: focusNode,
                     decoration: customInputDecoration('Titre'),
+                    cursorColor: green,
+                    style: const TextStyle(color: Colors.black87),
+                    onChanged: (_) => setState(() {}),
                     onEditingComplete: onEditingComplete,
                   );
-                }
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(8),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (context, index) {
+                        final option = options.elementAt(index);
+                        return ListTile(
+                          title: Text(option),
+                          onTap: () => onSelected(option),
+                        );
+                      },
+                    ),
+                  );
+                },
               )
             else
               buildTextField(
@@ -276,7 +314,7 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
             // Description & TVA si service connu
             if (selectedType == 'service' &&
-            servicesDetails.containsKey(titreController.text.trim()))
+                servicesDetails.containsKey(titreController.text.trim()))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Text(
@@ -290,33 +328,6 @@ class _ItemLineFormState extends State<ItemLineForm> {
 
             const SizedBox(height: 10),
 
-            // TVA toujours affichée
-            Row(
-              children: [
-                Text(
-                  'TVA:',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(width: 8),
-                DropdownButton<double>(
-                  value: selectedTva,
-                  items: tvaRates
-                      .map((rate) => DropdownMenuItem(value: rate, child: Text('$rate %')))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedTva = value;
-                        updateItem();
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-
             // Ligne Quantité, Unité, Prix Unitaire HT
             Row(
               children: [
@@ -324,24 +335,30 @@ class _ItemLineFormState extends State<ItemLineForm> {
                   child: buildTextField(
                     controller: quantiteController,
                     label: 'Quantité',
+                    color: midnightBlue,
                     keyboardType: TextInputType.number,
                     onChanged: (_) => updateItem(),
+                    cursorColor: green,
                   ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selectedUnite,
+                    decoration: customInputDecoration('Unité', color: midnightBlue,),
+                    dropdownColor: Colors.white,
                     items: uniteOptions
                         .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                         .toList(),
-                    decoration: customInputDecoration('Unité'),
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() => selectedUnite = value);
-                        updateItem();
+                        setState(() {
+                          selectedUnite = value;
+                          updateItem();
+                        });
                       }
                     },
+                    style: const TextStyle(color: Colors.black87),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -350,16 +367,71 @@ class _ItemLineFormState extends State<ItemLineForm> {
                     controller: puHtController,
                     focusNode: puHtFocusNode,
                     label: 'Prix Unitaire HT (€)',
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+                    color: midnightBlue,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                    ],
                     onChanged: (_) => updateItem(),
+                    cursorColor: green,
                   ),
                 ),
               ],
             ),
 
             const SizedBox(height: 18),
+            // TVA
+            SizedBox(
+              width: 140,
+              child: DropdownButtonFormField<double>(
+                value: selectedTva,
+                decoration: customInputDecoration(''),
+                dropdownColor: Colors.white,
+                items: tvaRates.map((rate) {
+                  final rateText = rate % 1 == 0
+                      ? rate.toStringAsFixed(0)
+                      : rate.toString();
+                  return DropdownMenuItem(
+                    value: rate,
+                    child: Text(
+                      'TVA $rateText %',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: midnightBlue,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                selectedItemBuilder: (context) => tvaRates.map((rate) {
+                  final rateText = rate % 1 == 0
+                      ? rate.toStringAsFixed(0)
+                      : rate.toString();
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'TVA $rateText %',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: midnightBlue,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      selectedTva = value;
+                      updateItem();
+                    });
+                  }
+                },
+                style: const TextStyle(color: Colors.black87, fontSize: 16),
+              ),
+            ),
 
+            const SizedBox(height: 14),
             // Bouton supprimer
             Align(
               alignment: Alignment.centerRight,
@@ -370,8 +442,13 @@ class _ItemLineFormState extends State<ItemLineForm> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: green,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   elevation: 3,
                   shadowColor: Colors.greenAccent,
                 ),

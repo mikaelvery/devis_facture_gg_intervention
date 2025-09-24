@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.devis_facture_gg_intervention"
-    compileSdkVersion(35)
+    compileSdkVersion(36)
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -22,8 +22,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.devis_facture_gg_intervention"
-        minSdkVersion(23)
-        targetSdkVersion(35)
+        minSdkVersion(24)
+        targetSdkVersion(36)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

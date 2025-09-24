@@ -125,7 +125,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GG Intervention Devis et Factures',
+      title: 'G&G Intervention Devis et Factures',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const SplashScreen(),

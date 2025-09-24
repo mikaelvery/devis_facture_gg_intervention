@@ -143,33 +143,38 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
     TextEditingController controller,
     String label, {
     TextInputType keyboardType = TextInputType.text,
+    Color textColor = Colors.white,
+    Color? fillColor,
+    ValueChanged<String>? onChanged,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.white),
+      onChanged: onChanged,
+      cursorColor: blueAccent,
+      style: TextStyle(color: textColor),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
+        labelStyle: TextStyle(color: Colors.grey[700]),
+        filled: fillColor != null,
+        fillColor: fillColor,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white.withAlpha(100)),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.white),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        // Enlever filled et fillColor
-        // filled: true,
-        // fillColor: Colors.white.withAlpha(25),
-        isDense: true, // optionnel, pour un champ plus compact
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: blueAccent, width: 2),
         ),
       ),
     );
   }
+
 
   Widget _buildSummaryRow(String label, double amount, {bool isBold = false}) {
     return Padding(
@@ -263,67 +268,106 @@ class _DevisFormScreenState extends State<DevisFormScreen> {
 
               if (_selectedClient == null) ...[
                 SizedBox(height: 24),
-                const Text(
-                  'Informations client',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Informations client',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: white,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                _clientPrenomController,
+                                'Prénom',
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                _clientNomController,
+                                'Nom',
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        _buildTextField(
+                          _clientAdresseController,
+                          'Adresse',
+                          fillColor: Colors.grey[100],
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                _clientEmailController,
+                                'Email',
+                                keyboardType: TextInputType.emailAddress,
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                _clientTelephoneController,
+                                'Téléphone',
+                                keyboardType: TextInputType.phone,
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                _clientCodePostalController,
+                                'Code postal',
+                                keyboardType: TextInputType.number,
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                _clientVilleController,
+                                'Ville',
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        _buildTextField(
+                          _clientPaysController,
+                          'Pays',
+                          fillColor: Colors.grey[100],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(_clientPrenomController, 'Prénom'),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildTextField(_clientNomController, 'Nom'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildTextField(_clientAdresseController, 'Adresse'),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(
-                        _clientEmailController,
-                        'Email',
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildTextField(
-                        _clientTelephoneController,
-                        'Téléphone',
-                        keyboardType: TextInputType.phone,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(
-                        _clientCodePostalController,
-                        'Code postal',
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildTextField(_clientVilleController, 'Ville'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildTextField(_clientPaysController, 'Pays'),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
               ],
 
               const Text(

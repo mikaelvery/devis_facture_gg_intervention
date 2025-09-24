@@ -141,11 +141,11 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
                 children: [
                   pw.Image(logoImage, width: 70),
                   pw.SizedBox(height: 10),
-                  pw.Text('GG Intervention', style: pw.TextStyle(font: fontBold)),
+                  pw.Text('G&G Intervention', style: pw.TextStyle(font: fontBold)),
                   pw.Text('30 rue général de gaulle'),
                   pw.Text('57050 Longeville-Lès-Metz, France'),
                   pw.Text('gg.intervention@gmail.com'),
-                  pw.Text('+33 6 45 19 06 94'),
+                  pw.Text('+33 07 60 43 21 22'),
                 ],
               ),
               pw.Spacer(),
@@ -289,7 +289,7 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
           ),
           pw.SizedBox(height: 30),
           pw.Text(
-            'En signant ce devis, j’accepte les conditions générales de vente de GG Intervention.',
+            'En signant ce devis, j’accepte les conditions générales de vente de G&G Intervention.',
             style: pw.TextStyle(fontSize: 10),
           ),
           // Affiche la signature si elle existe
@@ -302,8 +302,8 @@ class _DevisPreviewScreenState extends State<DevisPreviewScreen> {
           pw.Divider(),
           pw.Center(
             child: pw.Text(
-              'Micro-entreprise GG Intervention - SIREN 123 456 789\n'
-              'Régime de TVA sur les encaissements - Document émis par GG Intervention',
+              'Auto-entreprise G&G Intervention - SIREN 988 560 827\n'
+              'Régime de TVA sur les encaissements - Document émis par G&G Intervention',
               style: pw.TextStyle(fontSize: 8),
               textAlign: pw.TextAlign.center,
             ),
